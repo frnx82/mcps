@@ -1,0 +1,5 @@
+# Core — no dependencies needed for mock mode!
+# The MCP server uses Python's built-in http.server module.
+
+# Production mode only (for connecting to real Splunk):
+splunk-sdk>=2.0.0

@@ -1,0 +1,203 @@
+---
+# ──────────────────────────────────────────────────────────────────
+# Splunk MCP Server — Kubernetes Deployment Manifest
+# ──────────────────────────────────────────────────────────────────
+#
+# Deploys the Splunk MCP Server as a ClusterIP service that your
+# apps (mock-project-gemini, release-readiness, etc.) can call
+# at: http://splunk-mcp-service:8080
+#
+# ════════════════════════════════════════════════════════════════
+# DEPLOYMENT OPTIONS
+# ════════════════════════════════════════════════════════════════
+#
+# Option A: Mock Mode (no Splunk needed — for demos/development)
+#
+#   Just apply this file as-is. MOCK_MODE=true is the default.
+#
+#     oc apply -f deploy.yaml -n YOUR_NAMESPACE
+#
+#
+# Option B: Production Mode (connects to real Splunk)
+#
+#   1. Create the Splunk credentials secret:
+#
+#      oc create secret generic splunk-mcp-credentials \
+#        --from-literal=SPLUNK_TOKEN=your_splunk_token_here \
+#        -n YOUR_NAMESPACE
+#
+#   2. Edit this file:
+#      - Set MOCK_MODE to "false"
+#      - Set SPLUNK_INSTANCE to your Splunk server hostname
+#      - Uncomment the SPLUNK_TOKEN secretKeyRef block
+#
+#   3. Apply:
+#
+#      oc apply -f deploy.yaml -n YOUR_NAMESPACE
+#
+#
+# Option C: Production + Username/Password Auth
+#
+#   1. Create secret with username + password:
+#
+#      oc create secret generic splunk-mcp-credentials \
+#        --from-literal=SPLUNK_USERNAME=your_username \
+#        --from-literal=SPLUNK_PASSWORD=your_password \
+#        -n YOUR_NAMESPACE
+#
+#   2. Uncomment the SPLUNK_USERNAME and SPLUNK_PASSWORD blocks below
+#   3. Apply
+#
+# ──────────────────────────────────────────────────────────────────
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: splunk-mcp-server
+  labels:
+    app: splunk-mcp-server
+    component: mcp
+    tier: infrastructure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: splunk-mcp-server
+  template:
+    metadata:
+      labels:
+        app: splunk-mcp-server
+        component: mcp
+        tier: infrastructure
+    spec:
+      containers:
+      - name: splunk-mcp
+        image: IMAGE_REGISTRY/splunk-mcp-server:latest    # ← Replace with your registry
+        # For local/mock testing, you can build with:
+        #   docker build -t splunk-mcp-server:latest services/mcp_splunk/
+        # and set image to: splunk-mcp-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        # ════════════════════════════════════════════════════════
+        # Mode: set to "true" for mock data, "false" for real Splunk
+        # ════════════════════════════════════════════════════════
+        - name: MOCK_MODE
+          value: "true"
+
+        # ════════════════════════════════════════════════════════
+        # MCP Server Port
+        # ════════════════════════════════════════════════════════
+        - name: PORT
+          value: "8080"
+
+        # ════════════════════════════════════════════════════════
+        # Splunk Connection (Production Mode only)
+        # ════════════════════════════════════════════════════════
+        - name: SPLUNK_INSTANCE
+          value: ""                         # ← Set to: splunk.your-company.com
+        - name: SPLUNK_PORT
+          value: "8089"
+        - name: SPLUNK_SCHEME
+          value: "https"
+        - name: SPLUNK_INDEX
+          value: "main"                     # Default index for searches
+
+        # ── Token Auth (recommended) ──
+        # Uncomment when using production mode with token auth:
+        #
+        # - name: SPLUNK_TOKEN
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: splunk-mcp-credentials
+        #       key: SPLUNK_TOKEN
+
+        # ── Username/Password Auth (alternative) ──
+        # Uncomment when using production mode with user/pass:
+        #
+        # - name: SPLUNK_USERNAME
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: splunk-mcp-credentials
+        #       key: SPLUNK_USERNAME
+        # - name: SPLUNK_PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: splunk-mcp-credentials
+        #       key: SPLUNK_PASSWORD
+
+        # ════════════════════════════════════════════════════════
+        # Optional Tuning
+        # ════════════════════════════════════════════════════════
+        # - name: SPLUNK_CLIENT_TTL_SECONDS
+        #   value: "300"
+        # - name: SPLUNK_CLIENT_MAX_SIZE
+        #   value: "10"
+
+        # ════════════════════════════════════════════════════════
+        # Resources
+        # ════════════════════════════════════════════════════════
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+
+        # ════════════════════════════════════════════════════════
+        # Health Probes
+        # ════════════════════════════════════════════════════════
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 2
+          periodSeconds: 5
+          failureThreshold: 10
+
+---
+# ──────────────────────────────────────────────────────────────────
+# Service — Exposes the MCP server within the cluster
+# ──────────────────────────────────────────────────────────────────
+# Other pods call: http://splunk-mcp-service:8080
+#
+# In your app's env vars, set:
+#   SPLUNK_MCP_URL=http://splunk-mcp-service:8080
+# ──────────────────────────────────────────────────────────────────
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: splunk-mcp-service
+  labels:
+    app: splunk-mcp-server
+    component: mcp
+spec:
+  type: ClusterIP
+  selector:
+    app: splunk-mcp-server
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
