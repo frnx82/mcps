@@ -15,14 +15,14 @@
 #
 #   Just apply this file as-is. MOCK_MODE=true is the default.
 #
-#     oc apply -f deploy.yaml -n YOUR_NAMESPACE
+#     kubectl apply -f deploy.yaml -n YOUR_NAMESPACE
 #
 #
 # Option B: Production Mode (connects to real Splunk)
 #
 #   1. Create the Splunk credentials secret:
 #
-#      oc create secret generic splunk-mcp-credentials \
+#      kubectl create secret generic splunk-mcp-credentials \
 #        --from-literal=SPLUNK_TOKEN=your_splunk_token_here \
 #        -n YOUR_NAMESPACE
 #
@@ -33,14 +33,14 @@
 #
 #   3. Apply:
 #
-#      oc apply -f deploy.yaml -n YOUR_NAMESPACE
+#      kubectl apply -f deploy.yaml -n YOUR_NAMESPACE
 #
 #
 # Option C: Production + Username/Password Auth
 #
 #   1. Create secret with username + password:
 #
-#      oc create secret generic splunk-mcp-credentials \
+#      kubectl create secret generic splunk-mcp-credentials \
 #        --from-literal=SPLUNK_USERNAME=your_username \
 #        --from-literal=SPLUNK_PASSWORD=your_password \
 #        -n YOUR_NAMESPACE
@@ -77,6 +77,8 @@ spec:
         #   docker build -t splunk-mcp-server:latest services/mcp_splunk/
         # and set image to: splunk-mcp-server:latest
         imagePullPolicy: Always
+        command: ["python"]
+        args: ["main.py"]
         ports:
         - containerPort: 8080
           name: http

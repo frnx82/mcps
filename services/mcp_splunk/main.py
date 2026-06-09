@@ -55,6 +55,32 @@ def _get_splunk_service():
     if _splunk_service is not None:
         return _splunk_service
 
+    # ── Diagnostic: log connection parameters ──────────────────────────
+    masked_token = (SPLUNK_TOKEN[:4] + '****') if SPLUNK_TOKEN else '(not set)'
+    masked_pass = ('****' + SPLUNK_PASSWORD[-2:]) if SPLUNK_PASSWORD else '(not set)'
+    print(f"[splunk-mcp] ── Connection Diagnostics ──")
+    print(f"[splunk-mcp]   SPLUNK_INSTANCE:  '{SPLUNK_INSTANCE}' {'⚠️ EMPTY!' if not SPLUNK_INSTANCE else ''}")
+    print(f"[splunk-mcp]   SPLUNK_PORT:      {SPLUNK_PORT}")
+    print(f"[splunk-mcp]   SPLUNK_SCHEME:    {SPLUNK_SCHEME}")
+    print(f"[splunk-mcp]   SPLUNK_TOKEN:     {masked_token}")
+    print(f"[splunk-mcp]   SPLUNK_USERNAME:  '{SPLUNK_USERNAME or '(not set)'}'")
+    print(f"[splunk-mcp]   SPLUNK_PASSWORD:  {masked_pass}")
+    print(f"[splunk-mcp]   Auth method:      {'Token' if SPLUNK_TOKEN else 'User/Pass' if SPLUNK_USERNAME else 'NONE ⚠️'}")
+
+    # ── Diagnostic: test network connectivity before SDK login ────────
+    import socket
+    try:
+        sock = socket.create_connection((SPLUNK_INSTANCE, SPLUNK_PORT), timeout=10)
+        sock.close()
+        print(f"[splunk-mcp]   Network check:    ✅ {SPLUNK_INSTANCE}:{SPLUNK_PORT} reachable")
+    except Exception as net_err:
+        print(f"[splunk-mcp]   Network check:    ❌ Cannot reach {SPLUNK_INSTANCE}:{SPLUNK_PORT}: {net_err}")
+        raise ConnectionError(
+            f"Cannot reach Splunk at {SPLUNK_INSTANCE}:{SPLUNK_PORT}: {net_err}. "
+            f"Check SPLUNK_INSTANCE, SPLUNK_PORT, and network/firewall rules."
+        )
+
+    # ── Attempt SDK connection ────────────────────────────────────────
     try:
         import splunklib.client as client
         connect_args = {
@@ -70,11 +96,29 @@ def _get_splunk_service():
         else:
             raise ValueError("No Splunk credentials: set SPLUNK_TOKEN or SPLUNK_USERNAME + SPLUNK_PASSWORD")
 
+        print(f"[splunk-mcp]   Connecting to {SPLUNK_SCHEME}://{SPLUNK_INSTANCE}:{SPLUNK_PORT} ...")
         _splunk_service = client.connect(**connect_args)
         print(f"[splunk-mcp] ✅ Connected to Splunk at {SPLUNK_SCHEME}://{SPLUNK_INSTANCE}:{SPLUNK_PORT}")
         return _splunk_service
     except Exception as e:
+        import traceback
         print(f"[splunk-mcp] ❌ Failed to connect to Splunk: {e}")
+        print(f"[splunk-mcp]    Error type: {type(e).__name__}")
+        print(f"[splunk-mcp]    Full traceback:")
+        traceback.print_exc()
+        # Provide actionable hints based on error type
+        err_str = str(e).lower()
+        if 'xml' in err_str or 'sessionkey' in err_str or 'syntax error' in err_str:
+            print(f"[splunk-mcp]    💡 HINT: Splunk returned an invalid login response.")
+            print(f"[splunk-mcp]           This usually means wrong username/password,")
+            print(f"[splunk-mcp]           or the Splunk server returned an error page.")
+            print(f"[splunk-mcp]           Verify credentials: kubectl get secret splunk-mcp-credentials -o yaml")
+        elif 'ssl' in err_str or 'certificate' in err_str:
+            print(f"[splunk-mcp]    💡 HINT: TLS/SSL error. Try setting SPLUNK_SCHEME=http")
+            print(f"[splunk-mcp]           or check if the Splunk cert is self-signed.")
+        elif 'refused' in err_str or 'timeout' in err_str:
+            print(f"[splunk-mcp]    💡 HINT: Network error. Check firewall rules between")
+            print(f"[splunk-mcp]           GDC cluster and Splunk ({SPLUNK_INSTANCE}:{SPLUNK_PORT}).")
         raise
 
 
@@ -578,12 +622,25 @@ class MCPHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
+        if content_length == 0:
+            print(f"[splunk-mcp] ⚠️ Empty request body (Content-Length: 0)")
+            self._send_json(200, {
+                'jsonrpc': '2.0', 'id': '1',
+                'error': {'code': -32700, 'message': 'Empty request body — Content-Length was 0'}
+            })
+            return
+
         body = self.rfile.read(content_length)
 
         try:
             request = json.loads(body)
-        except json.JSONDecodeError:
-            self._send_json(400, {'error': 'Invalid JSON'})
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"[splunk-mcp] ⚠️ JSON parse error: {e}")
+            print(f"[splunk-mcp]    Body ({len(body)} bytes): {body[:300]}")
+            self._send_json(200, {
+                'jsonrpc': '2.0', 'id': '1',
+                'error': {'code': -32700, 'message': f'Invalid JSON in request body: {e}'}
+            })
             return
 
         req_id = request.get('id', '1')
