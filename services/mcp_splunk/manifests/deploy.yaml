@@ -85,6 +85,13 @@ spec:
           protocol: TCP
         env:
         # ════════════════════════════════════════════════════════
+        # Python: disable output buffering so all print() logs
+        # appear immediately in container logs (not just stderr)
+        # ════════════════════════════════════════════════════════
+        - name: PYTHONUNBUFFERED
+          value: "1"
+
+        # ════════════════════════════════════════════════════════
         # Mode: set to "true" for mock data, "false" for real Splunk
         # ════════════════════════════════════════════════════════
         - name: MOCK_MODE
