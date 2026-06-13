@@ -1,15 +1,26 @@
 # Build a GDC-compatible image from the existing MTA image.
-# Fixes file permissions so non-root UID (1000) can read all files.
+# Fixes file permissions so non-root UID (1000) can read all files
+# and write to runtime directories (var/, log/).
 FROM <JAMES_IMAGE>
 
 USER root
 
-# Fix permissions on conf/ and lib/ (image ships with 660 root:root)
+# Fix read permissions on conf/, lib/, bin/ (image ships with 660 root:root)
 RUN chmod -R 755 /deployments/james-server-app-3.6.1/conf/ \
                  /deployments/james-server-app-3.6.1/lib/ \
                  /deployments/james-server-app-3.6.1/bin/ \
  && chmod +x /deployments/james-server-app-3.6.1/bin/*.sh \
              /deployments/james-server-app-3.6.1/conf/*.sh 2>/dev/null || true
+
+# Create runtime directories James needs to write to and set ownership
+RUN mkdir -p /deployments/james-server-app-3.6.1/var/store/activemq/brokers \
+             /deployments/james-server-app-3.6.1/var/store/derby \
+             /deployments/james-server-app-3.6.1/var/store/lucene \
+             /deployments/james-server-app-3.6.1/var/sieve \
+             /deployments/james-server-app-3.6.1/var/mail \
+             /deployments/james-server-app-3.6.1/log \
+ && chown -R 1000:1000 /deployments/james-server-app-3.6.1/var/ \
+                       /deployments/james-server-app-3.6.1/log/
 
 # Switch back to non-root for GDC compliance
 USER 1000
