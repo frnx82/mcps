@@ -1,0 +1,15 @@
+# Build a GDC-compatible image from the existing MTA image.
+# Fixes file permissions so non-root UID (1000) can read all files.
+FROM <JAMES_IMAGE>
+
+USER root
+
+# Fix permissions on conf/ and lib/ (image ships with 660 root:root)
+RUN chmod -R 755 /deployments/james-server-app-3.6.1/conf/ \
+                 /deployments/james-server-app-3.6.1/lib/ \
+                 /deployments/james-server-app-3.6.1/bin/ \
+ && chmod +x /deployments/james-server-app-3.6.1/bin/*.sh \
+             /deployments/james-server-app-3.6.1/conf/*.sh 2>/dev/null || true
+
+# Switch back to non-root for GDC compliance
+USER 1000
