@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-permissions
+spec:
+  restartPolicy: Never
+  imagePullSecrets:
+  - name: registry-artigop-pull-creds
+  containers:
+  - name: debug
+    image: "<JAMES_IMAGE>"        # ← Replace with your actual image
+    command:
+    - "sh"
+    - "-c"
+    - |
+      echo "=== Current User ==="
+      id
+      echo ""
+      echo "=== LIB directory permissions ==="
+      ls -la /deployments/james-server-app-3.6.1/lib/ | head -5
+      echo ""
+      echo "=== CONF directory permissions ==="
+      ls -la /deployments/james-server-app-3.6.1/conf/ | head -5
+      echo ""
+      echo "=== Can we read wrapper.conf? ==="
+      if cat /deployments/james-server-app-3.6.1/conf/wrapper.conf > /dev/null 2>&1; then
+        echo "YES - wrapper.conf is READABLE"
+        head -3 /deployments/james-server-app-3.6.1/conf/wrapper.conf
+      else
+        echo "NO - wrapper.conf is NOT READABLE"
+      fi
+      echo ""
+      echo "=== Can we read setenv.sh? ==="
+      if cat /deployments/james-server-app-3.6.1/conf/setenv.sh > /dev/null 2>&1; then
+        echo "YES - setenv.sh is READABLE"
+      else
+        echo "NO - setenv.sh is NOT READABLE"
+      fi
+      echo ""
+      echo "=== Can we read a JAR from lib? ==="
+      JAR=$(ls /deployments/james-server-app-3.6.1/lib/*.jar 2>/dev/null | head -1)
+      if [ -n "$JAR" ] && cat "$JAR" > /dev/null 2>&1; then
+        echo "YES - JARs are READABLE: $JAR"
+      else
+        echo "NO - JARs are NOT READABLE"
+      fi
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+        - ALL
