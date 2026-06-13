@@ -29,10 +29,16 @@ spec:
       - name: registry-artigop-pull-creds
       shareProcessNamespace: true
 
-      # Pod-level security — add GID 0 (root group) as supplementary
-      # so non-root containers can read rw-rw---- root:root image files
-      securityContext:
-        supplementalGroups: [0]
+      # Pod-level security context
+      # NOTE: Image files are rw-rw---- root:root (GID 0). To read them,
+      # supplementalGroups: [0] is needed, but GDC PSP blocks GID < 100.
+      # Options:
+      #   1. Request a Gatekeeper exception for supplementalGroups: [0]
+      #   2. Override conf/ files via ConfigMap (see config-files/)
+      #   3. Rebuild the image with 755 permissions
+      # Uncomment when PSP exception is granted:
+      # securityContext:
+      #   supplementalGroups: [0]
 
       # ════════════════════════════════════════════════════════════
       # Volumes
