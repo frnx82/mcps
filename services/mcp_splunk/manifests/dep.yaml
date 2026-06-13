@@ -1,0 +1,206 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "fabric-mta.fullname" . }}
+  annotations:
+    secret.reloader.stakater.com/reload: mta-cert-secret
+  labels:
+    {{- include "fabric-mta.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  updateStrategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "fabric-mta.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fabric-mta.selectorLabels" . | nindent 8 }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+        # Force a pod restart whenever the ConfigMap (wrapper.conf, *.xml)
+        # changes. Without this, "helm upgrade" updates the ConfigMap but the
+        # StatefulSet pod keeps the OLD mounted config (subPath mounts never
+        # live-update), so config-file fixes appear to have "no effect".
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      imagePullSecrets:
+      - name: registry-artigop-pull-creds
+      shareProcessNamespace: true
+
+      # ════════════════════════════════════════════════════════════
+      # Volumes
+      # ════════════════════════════════════════════════════════════
+      volumes:
+      # Writable emptyDir volumes — used to copy conf/ and lib/ from
+      # the image with correct permissions for GDC's non-root UID.
+      - name: conf-fixed
+        emptyDir: {}
+      - name: lib-fixed
+        emptyDir: {}
+
+      # ════════════════════════════════════════════════════════════
+      # Init Containers
+      # ════════════════════════════════════════════════════════════
+      initContainers:
+
+      # ── Init 1: Diagnostics + lock cleanup + conf staging ──────
+      - name: {{ .Chart.Name }}-init
+        image: "{{ .Values.image.registry }}/{{ .Values.image.namespace }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          echo "=== Configured james_version = {{ .Values.james_version }} ==="
+          echo "=== Listing /deployments ==="
+          ls -la /deployments 2>/dev/null
+          echo "=== Does /deployments/{{ .Values.james_version }} exist? ==="
+          ls -la /deployments/{{ .Values.james_version }} 2>/dev/null || echo "!! MISSING: /deployments/{{ .Values.james_version }}"
+          echo "=== Locating james-server-app*.jar (reveals the REAL lib path) ==="
+          JAR=$(find / -name "james-server-app*.jar" 2>/dev/null | head -n1)
+          [ -n "$JAR" ] && echo "REAL jar: $JAR" || echo "!! james-server-app jar not found anywhere"
+          echo "=== Locating wrapper.jar ==="
+          find / -name 'wrapper.jar' 2>/dev/null | head -n1
+          echo "=== Locating ALL wrapper.conf (image's own + our mount) ==="
+          for f in $(find / -name 'wrapper.conf' 2>/dev/null); do
+            echo "--- $f"
+            grep -E "REPO_DIR|APP_BASE|working.dir" "$f" 2>/dev/null
+          done
+          # Clean up stale lock/PID files from previous runs
+          VAR=/deployments/{{ .Values.james_version }}/var
+          rm -f "${VAR}/james.pid"
+          rm -f "${VAR}/store/activemq/brokers/KahaDB/lock"
+          rm -f "${VAR}/store/derby/"*.lck
+          rm -f "${VAR}/store/lucene/write.lock"
+          echo "=== Lock/PID cleanup done ==="
+        volumeMounts:
+        - name: {{ .Values.volumes.pvc.name }}
+          mountPath: /deployments/{{ .Values.james_version }}/var
+          subPath: var
+
+      # ── Init 2: Fix permissions for GDC (run as root) ──────────
+      # GDC runs containers as non-root, but image files are owned
+      # by root:root with restrictive permissions (rw-rw----).
+      # This init copies conf/ and lib/ to emptyDir volumes with
+      # 755 permissions so the main container can read them.
+      - name: fix-permissions
+        image: "{{ .Values.image.registry }}/{{ .Values.image.namespace }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        securityContext:
+          runAsUser: 0
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          echo "=== Copying conf/ and lib/ to writable emptyDir volumes ==="
+          cp -r /deployments/{{ .Values.james_version }}/conf/. /conf-fixed/ 2>/dev/null || true
+          cp -r /deployments/{{ .Values.james_version }}/lib/. /lib-fixed/ 2>/dev/null || true
+          # Make everything readable + executable by all users
+          chmod -R 755 /conf-fixed/ /lib-fixed/
+          # Ensure shell scripts are executable
+          chmod +x /conf-fixed/*.sh 2>/dev/null || true
+          echo "=== conf-fixed contents ==="
+          ls -lrt /conf-fixed/
+          echo "=== lib-fixed contents (first 20) ==="
+          ls -lrt /lib-fixed/ | head -20
+          echo "✅ Permissions fixed for GDC non-root UID"
+        volumeMounts:
+        - name: conf-fixed
+          mountPath: /conf-fixed
+        - name: lib-fixed
+          mountPath: /lib-fixed
+
+      # ════════════════════════════════════════════════════════════
+      # Main Container
+      # ════════════════════════════════════════════════════════════
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.registry }}/{{ .Values.image.namespace }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+        env:
+        - name: "SMTP_GATEWAYPORT"
+          value: "{{ .Values.service.port }}"
+
+        {{- if .Values.starttls.enabled }}
+        - name: "MTA_SECRET"
+          valueFrom:
+            secretKeyRef:
+              key: "{{ .Values.secret.MTA_SECRET }}"
+              {{- if empty .Values.secret.TLS_KEYSTORE_PASSWORD_SECRET_NAME }}
+              name: "{{ .Values.secret.NAME }}"
+              {{- else }}
+              name: "{{ .Values.secret.TLS_KEYSTORE_PASSWORD_SECRET_NAME }}"
+              {{- end }}
+        {{- end }}
+
+        - name: "SMTP_WEBSSO_USERNAME"
+          valueFrom:
+            secretKeyRef:
+              key: "{{ .Values.secret.SMTP_WEBSSO_USERNAME_KEY }}"
+              name: "{{ .Values.secret.NAME }}"
+        - name: "SMTP_WEBSSO_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              key: "{{ .Values.secret.SMTP_WEBSSO_PASSWORD_KEY }}"
+              name: "{{ .Values.secret.NAME }}"
+
+        {{- range $key, $value := .Values.service }}
+        {{- if (eq $key (upper $key)) }}
+        - name: "{{ $key }}"
+          value: "{{ $value }}"
+        {{- end }}
+        {{- end }}
+
+        ports:
+        - name: mta
+          containerPort: {{ .Values.container.port }}
+          protocol: TCP
+
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe:
+          {{- $readinessProbe := .Values.readinessProbe -}}
+          {{- $readinessProbe := unset $readinessProbe "enabled" -}}
+          {{- toYaml $readinessProbe | nindent 12 }}
+        {{- end }}
+
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          {{- $livenessProbe := .Values.livenessProbe -}}
+          {{- $livenessProbe := unset $livenessProbe "enabled" -}}
+          {{- toYaml $livenessProbe | nindent 12 }}
+        {{- end }}
+
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+
+        volumeMounts:
+        # ── Permission-fixed emptyDir mounts (override image paths) ──
+        - name: conf-fixed
+          mountPath: /deployments/{{ .Values.james_version }}/conf
+        - name: lib-fixed
+          mountPath: /deployments/{{ .Values.james_version }}/lib
+
+        # ── TLS keystore (conditional) ──
+        {{- if .Values.starttls.enabled }}
+        - name: {{ .Values.secret.TLS_KEYSTORE_NAME }}
+          mountPath: /deployments/{{ .Values.james_version }}/conf/keystore.jks
+          subPath: {{ .Values.secret.TLS_KEYSTORE_FILENAME }}
+        {{- end }}
+
+        # ── ConfigMap files (wrapper.conf, *.xml, etc.) ──
+        {{- range $name, $bytes := .Files.Glob "config-files/*" }}
+        - name: {{ $.Values.configMap.name }}
+          mountPath: {{ $.Values.volumes.configmap.mountPath }}/{{ base $name }}
+          subPath: {{ base $name }}
+        {{- end }}
+
+        # ── PVC mounts ──
+        - name: {{ .Values.volumes.pvc.name }}
+          mountPath: {{ .Values.volumes.pvc.mountPath }}
+        - name: {{ .Values.volumes.pvc.name }}
+          mountPath: /deployments/{{ .Values.james_version }}/log
+          subPath: log
+        - name: {{ .Values.volumes.pvc.name }}
+          mountPath: /deployments/{{ .Values.james_version }}/var
+          subPath: var
