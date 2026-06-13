@@ -40,6 +40,23 @@ spec:
       - name: lib-fixed
         emptyDir: {}
 
+      # ConfigMap volume (wrapper.conf, *.xml config files)
+      - name: {{ .Values.configMap.name }}
+        configMap:
+          name: {{ .Values.configMap.name }}
+
+      # PVC volume (var, log, data persistence)
+      - name: {{ .Values.volumes.pvc.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.volumes.pvc.name }}
+
+      # TLS keystore secret (conditional)
+      {{- if .Values.starttls.enabled }}
+      - name: {{ .Values.secret.TLS_KEYSTORE_NAME }}
+        secret:
+          secretName: {{ .Values.secret.TLS_KEYSTORE_NAME }}
+      {{- end }}
+
       # ════════════════════════════════════════════════════════════
       # Init Containers
       # ════════════════════════════════════════════════════════════
