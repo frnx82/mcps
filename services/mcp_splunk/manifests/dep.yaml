@@ -260,3 +260,26 @@ spec:
 
 #kubectl run debug --rm -it --restart=Never --image=<JAMES_IMAGE> -n YOUR_NAMESPACE \
  # --overrides='{"spec":{"containers":[{"name":"d","image":"<JAMES_IMAGE>","command":["sh","-c","id; echo LIB:; ls -la /deployments/james-server-app-3.6.1/lib/ | head -5; echo CONF:; ls -la /deployments/james-server-app-3.6.1/conf/ | head -5; echo; cat /deployments/james-server-app-3.6.1/conf/wrapper.conf | head -3 && echo READABLE || echo NOT-READABLE"],"securityContext":{"runAsUser":1000,"runAsGroup":1000,"allowPrivilegeEscalation":false,"seccompProfile":{"type":"RuntimeDefault"},"capabilities":{"drop":["ALL"]}}}]}}'
+
+
+ $overrides = @'
+{
+  "spec": {
+    "imagePullSecrets": [{"name": "registry-artigop-pull-creds"}],
+    "containers": [{
+      "name": "debug",
+      "image": "<JAMES_IMAGE>",
+      "command": ["sh", "-c", "id; echo LIB:; ls -la /deployments/james-server-app-3.6.1/lib/ | head -5; echo CONF:; ls -la /deployments/james-server-app-3.6.1/conf/ | head -5; echo; cat /deployments/james-server-app-3.6.1/conf/wrapper.conf | head -3 && echo READABLE || echo NOT-READABLE"],
+      "securityContext": {
+        "runAsUser": 1000,
+        "runAsGroup": 1000,
+        "allowPrivilegeEscalation": false,
+        "seccompProfile": {"type": "RuntimeDefault"},
+        "capabilities": {"drop": ["ALL"]}
+      }
+    }]
+  }
+}
+'@
+
+kubectl run debug --rm -it --restart=Never --image=<JAMES_IMAGE> -n YOUR_NAMESPACE --overrides=$overrides
