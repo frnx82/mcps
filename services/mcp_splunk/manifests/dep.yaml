@@ -171,6 +171,22 @@ spec:
             drop:
             - ALL
 
+        # Override entrypoint: bypass Tanuki wrapper, run Java directly.
+        # The wrapper's "bin/james console" doesn't use exec, so PID 1 exits
+        # and Kubernetes stops the container. run.sh uses "exec $JAVACMD"
+        # which keeps Java as PID 1 (foreground).
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          BASEDIR=/deployments/{{ .Values.james_version }}
+          # Source setenv.sh for JVM options
+          [ -f "$BASEDIR/bin/setenv.sh" ] && . "$BASEDIR/bin/setenv.sh"
+          # Source docker-entrypoint.sh for SMTP gateway config
+          [ -f /docker-entrypoint.sh ] && . /docker-entrypoint.sh 2>/dev/null || true
+          echo "Starting James via run.sh (exec, foreground)..."
+          exec "$BASEDIR/bin/run.sh"
+
         env:
         - name: "SMTP_GATEWAYPORT"
           value: "{{ .Values.service.port }}"
