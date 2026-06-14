@@ -182,12 +182,22 @@ spec:
           BASEDIR=/deployments/{{ .Values.james_version }}
           # Set working directory — Derby, ActiveMQ write relative to cwd
           cd "$BASEDIR"
-          # Source setenv.sh for JVM options
-          [ -f "$BASEDIR/bin/setenv.sh" ] && . "$BASEDIR/bin/setenv.sh"
-          # Source docker-entrypoint.sh for SMTP gateway config
-          [ -f /docker-entrypoint.sh ] && . /docker-entrypoint.sh 2>/dev/null || true
-          echo "Starting James via run.sh (exec, foreground)..."
-          exec "$BASEDIR/bin/run.sh"
+          
+          # Patch docker-entrypoint.sh: replace "bin/james console" with
+          # "exec bin/run.sh" so Java stays as PID 1 (foreground).
+          # This preserves ALL config setup (SMTP gateway, DB, etc.)
+          ENTRYPOINT=$(find / -name "docker-entrypoint.sh" -type f 2>/dev/null | head -1)
+          if [ -n "$ENTRYPOINT" ]; then
+            cp "$ENTRYPOINT" /tmp/docker-entrypoint-patched.sh
+            sed -i 's|.*/bin/james console.*|cd '"$BASEDIR"' \&\& exec '"$BASEDIR"'/bin/run.sh|' /tmp/docker-entrypoint-patched.sh
+            chmod +x /tmp/docker-entrypoint-patched.sh
+            echo "Starting James via patched entrypoint (run.sh, foreground)..."
+            exec /tmp/docker-entrypoint-patched.sh
+          else
+            echo "WARN: docker-entrypoint.sh not found, starting run.sh directly"
+            [ -f "$BASEDIR/bin/setenv.sh" ] && . "$BASEDIR/bin/setenv.sh"
+            exec "$BASEDIR/bin/run.sh"
+          fi
 
         env:
         - name: "SMTP_GATEWAYPORT"
