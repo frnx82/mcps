@@ -180,6 +180,8 @@ spec:
         - "-c"
         - |
           BASEDIR=/deployments/{{ .Values.james_version }}
+          # Set working directory — Derby, ActiveMQ write relative to cwd
+          cd "$BASEDIR"
           # Source setenv.sh for JVM options
           [ -f "$BASEDIR/bin/setenv.sh" ] && . "$BASEDIR/bin/setenv.sh"
           # Source docker-entrypoint.sh for SMTP gateway config
