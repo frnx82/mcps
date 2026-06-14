@@ -24,6 +24,12 @@ RUN mkdir -p /deployments/james-server-app-3.6.1/sieve \
  && chown -R 1000:1000 /deployments/james-server-app-3.6.1/sieve \
                        /deployments/james-server-app-3.6.1/var \
                        /deployments/james-server-app-3.6.1/log
+# Force wrapper to run in FOREGROUND (console) mode.
+# Without this, the wrapper forks to background, PID 1 exits,
+# and Kubernetes stops the container (exit code 0, "Completed").
+RUN echo "" >> /deployments/james-server-app-3.6.1/conf/wrapper.conf \
+ && echo "# GDC fix: prevent daemon mode so container stays alive" >> /deployments/james-server-app-3.6.1/conf/wrapper.conf \
+ && echo "wrapper.daemonize=FALSE" >> /deployments/james-server-app-3.6.1/conf/wrapper.conf
 
 # Switch back to non-root for GDC compliance
 USER 1000
