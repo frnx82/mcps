@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: debug-find-wrapper
+  name: debug-startup
 spec:
   restartPolicy: Never
   automountServiceAccountToken: false
@@ -14,23 +14,27 @@ spec:
     - "sh"
     - "-c"
     - |
-      echo "=== Finding wrapper binary ==="
-      find / -name "wrapper" -type f 2>/dev/null
+      echo "=========================================="
+      echo "=== FULL docker-entrypoint.sh content ==="
+      echo "=========================================="
+      find / -name "docker-entrypoint*" 2>/dev/null | while read f; do
+        echo "--- FILE: $f ---"
+        cat "$f"
+        echo ""
+      done
       echo ""
-      echo "=== Finding all .sh scripts in bin/ ==="
-      ls -la /deployments/james-server-app-3.6.1/bin/
+      echo "================================="
+      echo "=== FULL run.sh content       ==="
+      echo "================================="
+      cat /deployments/james-server-app-3.6.1/bin/run.sh
       echo ""
-      echo "=== Finding run.sh or start scripts ==="
-      find / -name "run.sh" -o -name "james.sh" -o -name "start.sh" 2>/dev/null | head -10
+      echo "================================="
+      echo "=== FULL james (bin/james)    ==="
+      echo "================================="
+      cat /deployments/james-server-app-3.6.1/bin/james 2>/dev/null | tail -30
       echo ""
-      echo "=== What is the image ENTRYPOINT? ==="
-      cat /usr/local/bin/uid_entrypoint 2>/dev/null || echo "not at /usr/local/bin/uid_entrypoint"
-      echo ""
-      echo "=== docker-entrypoint.sh content ==="
-      find / -name "docker-entrypoint*" -exec cat {} \; 2>/dev/null | head -30
-      echo ""
-      echo "=== Check if wrapper.conf has daemonize ==="
-      grep -i "daemonize" /deployments/james-server-app-3.6.1/conf/wrapper.conf
+      echo "=== wrapper binary check ==="
+      file /deployments/james-server-app-3.6.1/bin/wrapper 2>/dev/null || ls -la /deployments/james-server-app-3.6.1/bin/wrapper
     securityContext:
       runAsUser: 1000
       runAsGroup: 1000
