@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: debug-startup
+  name: debug-dbconfig
 spec:
   restartPolicy: Never
   automountServiceAccountToken: false
@@ -9,32 +9,28 @@ spec:
   - name: registry-artigop-pull-creds
   containers:
   - name: debug
-    image: "<JAMES_IMAGE>"        # ← Replace with your NEW image
+    image: "<JAMES_IMAGE>"
     command:
     - "sh"
     - "-c"
     - |
-      echo "=========================================="
-      echo "=== FULL docker-entrypoint.sh content ==="
-      echo "=========================================="
-      find / -name "docker-entrypoint*" 2>/dev/null | while read f; do
-        echo "--- FILE: $f ---"
+      echo "=== Looking for database config files ==="
+      ls -la /deployments/james-server-app-3.6.1/conf/ | grep -i "database\|persist\|openjpa\|jdbc"
+      echo ""
+      echo "=== james-database.properties ==="
+      cat /deployments/james-server-app-3.6.1/conf/james-database.properties 2>/dev/null || echo "NOT FOUND"
+      echo ""
+      echo "=== All .properties files in conf/ ==="
+      ls /deployments/james-server-app-3.6.1/conf/*.properties 2>/dev/null || echo "No .properties files"
+      echo ""
+      echo "=== META-INF/persistence.xml ==="
+      find /deployments -name "persistence.xml" 2>/dev/null | while read f; do
+        echo "--- $f ---"
         cat "$f"
-        echo ""
       done
       echo ""
-      echo "================================="
-      echo "=== FULL run.sh content       ==="
-      echo "================================="
-      cat /deployments/james-server-app-3.6.1/bin/run.sh
-      echo ""
-      echo "================================="
-      echo "=== FULL james (bin/james)    ==="
-      echo "================================="
-      cat /deployments/james-server-app-3.6.1/bin/james 2>/dev/null | tail -30
-      echo ""
-      echo "=== wrapper binary check ==="
-      file /deployments/james-server-app-3.6.1/bin/wrapper 2>/dev/null || ls -la /deployments/james-server-app-3.6.1/bin/wrapper
+      echo "=== Full conf/ listing ==="
+      ls -la /deployments/james-server-app-3.6.1/conf/
     securityContext:
       runAsUser: 1000
       runAsGroup: 1000
