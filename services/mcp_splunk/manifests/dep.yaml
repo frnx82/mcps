@@ -44,12 +44,9 @@ spec:
       # Volumes
       # ════════════════════════════════════════════════════════════
       volumes:
-      # Writable emptyDir volumes — used to copy conf/ and lib/ from
-      # the image with correct permissions for GDC's non-root UID.
-      - name: conf-fixed
-        emptyDir: {}
-      - name: lib-fixed
-        emptyDir: {}
+      # NOTE: conf-fixed and lib-fixed emptyDir volumes REMOVED.
+      # The rebuilt image (Dockerfile.gdc-mta) has chown -R 1000:1000,
+      # so image files are directly readable. No emptyDir copy needed.
 
       # ConfigMap volume (wrapper.conf, *.xml config files)
       - name: {{ .Values.configMap.name }}
@@ -116,43 +113,8 @@ spec:
           mountPath: /deployments/{{ .Values.james_version }}/var
           subPath: var
 
-      # ── Init 2: Copy conf/ and lib/ to writable emptyDirs ────────
-      # Image files are rw-rw---- root:root. With supplementalGroups: [0]
-      # above, this container has GID 0 as supplementary group, so it
-      # can READ those files. It copies them to emptyDir volumes where
-      # the owning UID (1000) has full control.
-      - name: fix-permissions
-        image: "{{ .Values.image.registry }}/{{ .Values.image.namespace }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-        securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
-          allowPrivilegeEscalation: false
-          seccompProfile:
-            type: RuntimeDefault
-          capabilities:
-            drop:
-            - ALL
-        command:
-        - "/bin/sh"
-        - "-c"
-        - |
-          echo "=== Copying conf/ and lib/ to writable emptyDir volumes ==="
-          echo "=== Current user: $(id) ==="
-          # Copy files — readable via supplementalGroups: [0] (GID 0)
-          cp -r /deployments/{{ .Values.james_version }}/conf/. /conf-fixed/ 2>/dev/null || true
-          cp -r /deployments/{{ .Values.james_version }}/lib/. /lib-fixed/ 2>/dev/null || true
-          # Ensure shell scripts are executable
-          chmod +x /conf-fixed/*.sh 2>/dev/null || true
-          echo "=== conf-fixed contents ==="
-          ls -lrt /conf-fixed/
-          echo "=== lib-fixed contents (first 20) ==="
-          ls -lrt /lib-fixed/ | head -20
-          echo "✅ Files copied to writable emptyDirs"
-        volumeMounts:
-        - name: conf-fixed
-          mountPath: /conf-fixed
-        - name: lib-fixed
-          mountPath: /lib-fixed
+      # NOTE: fix-permissions init container REMOVED.
+      # The rebuilt image already has correct ownership (1000:1000).
 
       # ════════════════════════════════════════════════════════════
       # Main Container
@@ -256,11 +218,8 @@ spec:
           {{- toYaml .Values.resources | nindent 12 }}
 
         volumeMounts:
-        # ── Permission-fixed emptyDir mounts (override image paths) ──
-        - name: conf-fixed
-          mountPath: /deployments/{{ .Values.james_version }}/conf
-        - name: lib-fixed
-          mountPath: /deployments/{{ .Values.james_version }}/lib
+        # NOTE: conf-fixed and lib-fixed mounts REMOVED.
+        # Image conf/ and lib/ are used directly (owned by 1000:1000).
 
         # ── TLS keystore (conditional) ──
         {{- if .Values.starttls.enabled }}
@@ -285,29 +244,3 @@ spec:
         - name: {{ .Values.volumes.pvc.name }}
           mountPath: /deployments/{{ .Values.james_version }}/var
           subPath: var
-
-#kubectl run debug --rm -it --restart=Never --image=<JAMES_IMAGE> -n YOUR_NAMESPACE \
- # --overrides='{"spec":{"containers":[{"name":"d","image":"<JAMES_IMAGE>","command":["sh","-c","id; echo LIB:; ls -la /deployments/james-server-app-3.6.1/lib/ | head -5; echo CONF:; ls -la /deployments/james-server-app-3.6.1/conf/ | head -5; echo; cat /deployments/james-server-app-3.6.1/conf/wrapper.conf | head -3 && echo READABLE || echo NOT-READABLE"],"securityContext":{"runAsUser":1000,"runAsGroup":1000,"allowPrivilegeEscalation":false,"seccompProfile":{"type":"RuntimeDefault"},"capabilities":{"drop":["ALL"]}}}]}}'
-
-
- $overrides = @'
-{
-  "spec": {
-    "imagePullSecrets": [{"name": "registry-artigop-pull-creds"}],
-    "containers": [{
-      "name": "debug",
-      "image": "<JAMES_IMAGE>",
-      "command": ["sh", "-c", "id; echo LIB:; ls -la /deployments/james-server-app-3.6.1/lib/ | head -5; echo CONF:; ls -la /deployments/james-server-app-3.6.1/conf/ | head -5; echo; cat /deployments/james-server-app-3.6.1/conf/wrapper.conf | head -3 && echo READABLE || echo NOT-READABLE"],
-      "securityContext": {
-        "runAsUser": 1000,
-        "runAsGroup": 1000,
-        "allowPrivilegeEscalation": false,
-        "seccompProfile": {"type": "RuntimeDefault"},
-        "capabilities": {"drop": ["ALL"]}
-      }
-    }]
-  }
-}
-'@
-
-kubectl run debug --rm -it --restart=Never --image=<JAMES_IMAGE> -n YOUR_NAMESPACE --overrides=$overrides
