@@ -1,0 +1,9 @@
+# ── Core (no dependencies needed for mock mode) ──
+# The MCP server uses Python's built-in http.server module.
+
+# ── Production database drivers ──
+oracledb>=2.0.0          # Oracle (thin mode — no Oracle Client needed)
+impyla>=0.18.0           # Impala (HiveServer2 protocol)
+google-cloud-bigquery>=3.0.0  # BigQuery
+pg8000>=1.30.0           # CloudSQL PostgreSQL
+PyMySQL>=1.1.0           # CloudSQL MySQL

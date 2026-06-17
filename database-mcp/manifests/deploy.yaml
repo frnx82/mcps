@@ -1,0 +1,172 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-mcp
+  labels:
+    app: database-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database-mcp
+  template:
+    metadata:
+      labels:
+        app: database-mcp
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: database-mcp
+          image: database-mcp:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            # ── Server config ──
+            - name: PORT
+              value: "8080"
+            - name: READ_ONLY
+              value: "true"
+            - name: LOG_LEVEL
+              value: "INFO"
+            - name: DEFAULT_ROW_LIMIT
+              value: "100"
+            - name: MAX_ROW_LIMIT
+              value: "1000"
+
+            # ── Oracle (on-prem) ──
+            - name: ORACLE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: oracle-host
+                  optional: true
+            - name: ORACLE_PORT
+              value: "1521"
+            - name: ORACLE_SERVICE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: oracle-service-name
+                  optional: true
+            - name: ORACLE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: oracle-user
+                  optional: true
+            - name: ORACLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: oracle-password
+                  optional: true
+
+            # ── Impala (on-prem) ──
+            - name: IMPALA_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: impala-host
+                  optional: true
+            - name: IMPALA_PORT
+              value: "21050"
+            - name: IMPALA_AUTH_MECHANISM
+              value: "NOSASL"
+
+            # ── BigQuery (GCP) ──
+            - name: BIGQUERY_PROJECT
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: bigquery-project
+                  optional: true
+            - name: BIGQUERY_LOCATION
+              value: "US"
+
+            # ── CloudSQL (GCP) ──
+            - name: CLOUDSQL_HOST
+              value: "127.0.0.1"  # Via Cloud SQL Auth Proxy sidecar
+            - name: CLOUDSQL_PORT
+              value: "5432"
+            - name: CLOUDSQL_TYPE
+              value: "postgres"
+            - name: CLOUDSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: cloudsql-user
+                  optional: true
+            - name: CLOUDSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: cloudsql-password
+                  optional: true
+            - name: CLOUDSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: database-mcp-secrets
+                  key: cloudsql-database
+                  optional: true
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+
+        # ── Cloud SQL Auth Proxy sidecar (for CloudSQL) ──
+        # Uncomment when using CloudSQL
+        # - name: cloud-sql-proxy
+        #   image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+        #   args:
+        #     - "--port=5432"
+        #     - "PROJECT:REGION:INSTANCE"
+        #   securityContext:
+        #     runAsUser: 1000
+        #     runAsNonRoot: true
+        #     allowPrivilegeEscalation: false
+        #   resources:
+        #     requests:
+        #       cpu: 50m
+        #       memory: 64Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-mcp
+spec:
+  selector:
+    app: database-mcp
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: ClusterIP
