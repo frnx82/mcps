@@ -17,6 +17,6 @@ USER 1000
 EXPOSE 8080
 ENV PORT=8080
 
-# Run in production mode by default
+# Run with FastMCP — supports SSE and stdio transports
 # Use: docker run -e MOCK_MODE=true ... for mock mode
 CMD ["python", "main.py"]

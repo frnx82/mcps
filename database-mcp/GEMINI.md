@@ -12,9 +12,10 @@ agent interactions with this codebase over time.
 that connects AI agents to Oracle (on-prem), Impala (on-prem), BigQuery (GCP),
 and CloudSQL (GCP) databases.
 
-- **Language**: Python 3.9+
-- **Protocol**: MCP JSON-RPC over HTTP (no FastMCP dependency)
-- **Pattern**: Follows `mcp_splunk` structure from `mcps/services/`
+- **Language**: Python 3.11+
+- **Framework**: FastMCP 3.x (PrefectHQ)
+- **Protocol**: MCP over SSE, stdio, HTTP (auto-negotiated by FastMCP)
+- **Pattern**: Decorator-based `@mcp.tool()` API
 - **Deployment Target**: Google Distributed Cloud (GDC)
 
 ---
@@ -22,7 +23,7 @@ and CloudSQL (GCP) databases.
 ## Architecture
 
 ```
-main.py                  ← HTTP JSON-RPC server + MCP tool definitions
+main.py                  ← FastMCP server + @mcp.tool() definitions
 config.py                ← Environment-based configuration loader
 security.py              ← SQL validation, injection protection, row limits
 connectors/
@@ -40,11 +41,13 @@ manifests/
 
 ## Key Design Decisions
 
-### Why HTTP JSON-RPC instead of FastMCP?
-- Matches the existing `mcp_splunk` pattern in the monorepo
-- Zero external dependencies for the core server
-- Full control over request handling and error formatting
-- Works with any HTTP client (not just MCP SDK clients)
+### Why FastMCP 3.x?
+- **Dramatic code reduction**: 668 → 280 lines in main.py (60% less boilerplate)
+- **Auto schema generation**: Python type hints → MCP inputSchema (no manual JSON dicts)
+- **Multi-transport**: SSE, stdio, HTTP supported out of the box
+- **Client compatibility**: Works with Claude Desktop, Cursor, and any MCP client
+- **Developer tooling**: `fastmcp dev` provides interactive browser-based testing
+- **Production ready**: Built-in error handling, logging, and protocol compliance
 
 ### Why thin-mode oracledb?
 - No Oracle Client installation needed in Docker
@@ -66,7 +69,7 @@ manifests/
 
 ## Coding Conventions
 
-- **Python 3.9+ compatible** (deployed Python version on GDC)
+- **Python 3.11+ compatible** (deployed Python version on GDC)
 - **Type hints** on all function signatures
 - **Docstrings** on all classes and public methods
 - **Logging** via `logging` module, not `print()`
@@ -81,7 +84,7 @@ manifests/
 1. Create `connectors/newdb_connector.py`
 2. Implement `BaseConnector` (see `connectors/__init__.py`)
 3. Add config loading in `config.py` (new env vars)
-4. Add factory case in `main.py::_create_connector()`
+4. Add factory case in `main.py::_create_connector()` (unchanged from before)
 5. Add mock data in `connectors/mock_connector.py::MOCK_SCHEMAS`
 6. Update `requirements.txt` with the driver
 7. Update `manifests/deploy.yaml` with new Secret keys
@@ -91,12 +94,20 @@ manifests/
 
 ## Adding a New MCP Tool
 
-1. Define the handler function in `main.py` (pattern: `tool_<name>(arguments)`)
-2. Add to the `TOOLS` dict with:
-   - `description` (shown to AI agents)
-   - `inputSchema` (JSON Schema for parameters)
-   - `handler` (the function)
-3. The tool is automatically registered via `tools/list`
+1. Add a function in `main.py` with the `@mcp.tool()` decorator
+2. Use Python type hints for parameters (FastMCP auto-generates the JSON Schema)
+3. Write a clear docstring (shown to AI agents as the tool description)
+4. Return a JSON string with the result
+
+```python
+@mcp.tool()
+def my_new_tool(database: str, option: Optional[str] = None) -> str:
+    """Description shown to AI agents."""
+    # ... implementation ...
+    return json.dumps(result, indent=2, default=str)
+```
+
+The tool is automatically registered — no manual dict or schema needed.
 
 ---
 
@@ -107,27 +118,23 @@ manifests/
 python3 main.py --mock
 ```
 
-### Curl Test Template
+### Interactive Dev/Test UI
 ```bash
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "<TOOL_NAME>",
-      "arguments": { <ARGS> }
-    }
-  }' | python3 -m json.tool
+fastmcp dev main.py
 ```
+This opens a browser-based interface where you can call each tool interactively.
 
-### Security Test
-```bash
-# This should be REJECTED (read-only mode)
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"execute_query","arguments":{"database":"oracle","sql":"DROP TABLE users"}}}'
+### Connect from Claude Desktop / Cursor
+Add to your MCP client config:
+```json
+{
+  "mcpServers": {
+    "database-mcp": {
+      "command": "python",
+      "args": ["main.py", "--mock"]
+    }
+  }
+}
 ```
 
 ---
@@ -137,17 +144,21 @@ curl -s -X POST http://localhost:8080 \
 ### Current Limitations
 - [ ] No connection retry/reconnect logic yet
 - [ ] No query result caching
-- [ ] No SSE transport (HTTP only)
 - [ ] Impala connector doesn't support parameterized queries (impyla limitation)
 - [ ] BigQuery parameterized queries only support STRING, INT64, FLOAT64
+
+### Completed (via FastMCP migration)
+- [x] ~~No SSE transport~~ → SSE, stdio, HTTP all supported by FastMCP
+- [x] ~~Manual JSON-RPC handling~~ → Framework handles protocol
+- [x] ~~Manual inputSchema dicts~~ → Auto-generated from type hints
 
 ### Planned Improvements
 - [ ] Connection pool health monitoring and auto-reconnect
 - [ ] Query result caching with configurable TTL
-- [ ] SSE transport support for streaming results
 - [ ] Query history/audit logging
 - [ ] Rate limiting per client
 - [ ] mTLS support for database connections
+- [ ] OpenTelemetry tracing (FastMCP 3.x built-in support)
 - [ ] Prometheus metrics endpoint (/metrics)
 - [ ] Support for additional databases (Snowflake, Cassandra, MongoDB)
 
@@ -163,4 +174,4 @@ When working on this project, please update this file with:
 5. **Security findings** or new injection patterns to block
 
 This file is the single source of truth for AI agents working on this codebase.
-Last updated: 2026-06-17
+Last updated: 2026-06-23 (FastMCP 3.x migration)

@@ -1,19 +1,19 @@
-# Multi-Database MCP Server — Product Overview
+# Multi-Database MCP Server — Product Overview (FastMCP)
 
 ## What Is It?
 
-The **Multi-Database MCP Server** is a unified data gateway that connects AI agents to multiple enterprise databases through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). It enables AI-powered applications running on **Google Distributed Cloud (GDC)** to query, explore, and understand data across **Oracle**, **Impala**, **BigQuery**, and **CloudSQL** — all through a single, standardized interface.
+The **Multi-Database MCP Server** is a unified data gateway that connects AI agents to multiple enterprise databases through the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). Built with **FastMCP 3.x**, it enables AI-powered applications running on **Google Distributed Cloud (GDC)** to query, explore, and understand data across **Oracle**, **Impala**, **BigQuery**, and **CloudSQL** — all through a single, standardized interface.
 
-Instead of building custom integrations for each database, your agents connect to one MCP server and access all your data through natural, tool-based interactions.
+Instead of building custom integrations for each database, your agents connect to one MCP server and access all your data through natural, tool-based interactions. FastMCP's decorator-based API provides automatic schema generation, multi-transport support (SSE, stdio, HTTP), and built-in developer tooling.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    AI Agent (LLM)                        │
+│          AI Agent (Claude, Cursor, Custom)                │
 │         "Show me all settled trades from today"          │
 └──────────────────────┬──────────────────────────────────┘
-                       │ MCP JSON-RPC
+                       │ MCP (SSE / stdio / HTTP)
 ┌──────────────────────▼──────────────────────────────────┐
-│              Multi-Database MCP Server                   │
+│         Multi-Database MCP Server (FastMCP 3.x)          │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐ │
 │  │  Oracle   │ │  Impala  │ │ BigQuery │ │  CloudSQL  │ │
 │  │ (on-prem) │ │(on-prem) │ │  (GCP)   │ │   (GCP)    │ │
@@ -62,6 +62,7 @@ Full mock mode with realistic financial data for development and testing:
 - **Sample trade data** with real-looking instrument IDs, counterparties, prices
 - **No dependencies** — runs without any database drivers installed
 - Start with: `python main.py --mock`
+- Test interactively: `fastmcp dev main.py`
 
 ---
 
@@ -116,7 +117,9 @@ Before writing queries, agents can understand the full data model:
 
 ### 🚀 Accelerated Development
 - **Single integration point** for all databases — no custom connectors per data source
-- **Standard MCP protocol** — works with any MCP-compatible agent or client
+- **Standard MCP protocol** — works with any MCP-compatible agent or client (Claude Desktop, Cursor, etc.)
+- **Decorator-based tools** — add a new tool with `@mcp.tool()` and a typed function
+- **Interactive testing** — `fastmcp dev` provides a browser-based test UI
 - **Mock mode** for rapid development without database access
 
 ### 💰 Cost Efficiency
@@ -137,7 +140,9 @@ Before writing queries, agents can understand the full data model:
 
 ### 🔄 Extensibility
 - **Pluggable connector architecture** — add new databases by implementing `BaseConnector`
-- **Tool-based design** — add new MCP tools without modifying existing ones
+- **Tool-based design** — add new MCP tools with a simple `@mcp.tool()` decorator
+- **Resource support** — expose server metadata via `@mcp.resource()`
+- **Multi-transport** — SSE, stdio, and HTTP out of the box (no code changes)
 - **Environment-driven config** — no code changes to add new connections
 
 ---
@@ -159,8 +164,10 @@ Before writing queries, agents can understand the full data model:
 | Component | Technology |
 |-----------|-----------|
 | Language | Python 3.11 |
-| Protocol | MCP JSON-RPC over HTTP |
-| Server | Python `http.server` (zero dependencies for core) |
+| Framework | **FastMCP 3.x** (PrefectHQ) |
+| Protocol | MCP over SSE, stdio, HTTP |
+| Transport | Auto-negotiated by FastMCP |
 | Container | Python 3.11-slim, UID 1000 |
 | Deployment | Kubernetes (GDC), Helm-compatible |
-| Observability | Structured logging, /health endpoint |
+| Client Compat | Claude Desktop, Cursor, custom MCP clients |
+| Observability | Structured logging, health_check tool |

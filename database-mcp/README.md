@@ -1,4 +1,4 @@
-# Multi-Database MCP Server
+# Multi-Database MCP Server (FastMCP)
 
 A Model Context Protocol (MCP) server that provides a unified interface to query multiple databases:
 - **Oracle** (on-prem) via `oracledb` (thin mode)
@@ -6,47 +6,43 @@ A Model Context Protocol (MCP) server that provides a unified interface to query
 - **BigQuery** (GCP) via `google-cloud-bigquery`
 - **CloudSQL** (GCP) via `pg8000` (PostgreSQL) / `PyMySQL` (MySQL)
 
+Built with **FastMCP 3.x** for automatic protocol handling, SSE/stdio transport, and decorator-based tool definitions.
 Designed for deployment on **Google Distributed Cloud (GDC)** with non-root security context.
 
 ## Quick Start
 
-### Mock Mode (no databases needed)
+### Install
 
 ```bash
 cd mcps/database-mcp
+pip install -r requirements.txt
+```
+
+### Mock Mode (no databases needed)
+
+```bash
 python main.py --mock
 ```
 
-### Test with curl
+### Interactive Dev/Test UI
 
 ```bash
-# List available databases
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_databases","arguments":{}}}' | python -m json.tool
+fastmcp dev main.py
+```
 
-# List tables in Oracle
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_tables","arguments":{"database":"oracle","schema":"TRADING"}}}' | python -m json.tool
+### Connect from Claude Desktop / Cursor
 
-# Describe a table
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"describe_table","arguments":{"database":"oracle","table":"TRADES","schema":"TRADING"}}}' | python -m json.tool
+Add to your MCP client config:
 
-# Execute a query
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"execute_query","arguments":{"database":"oracle","sql":"SELECT * FROM TRADES WHERE TRADE_STATUS = '\''SETTLED'\''"}}}' | python -m json.tool
-
-# Get schema context (for NL→SQL)
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"get_schema_context","arguments":{"database":"oracle","schema":"TRADING"}}}' | python -m json.tool
-
-# Health check
-curl -s http://localhost:8080/health | python -m json.tool
+```json
+{
+  "mcpServers": {
+    "database-mcp": {
+      "command": "python",
+      "args": ["main.py", "--mock"]
+    }
+  }
+}
 ```
 
 ## MCP Tools
@@ -133,9 +129,9 @@ docker run -p 8080:8080 \
 ## Architecture
 
 ```
-Agent (LLM)
-    ↓ MCP JSON-RPC
-database-mcp (this server)
+Agent (Claude, Cursor, custom)
+    ↓ MCP (SSE / stdio / HTTP)
+database-mcp (FastMCP 3.x)
     ├── Oracle Connector  →  Oracle DB (on-prem)
     ├── Impala Connector  →  Impala Cluster (on-prem)
     ├── BigQuery Connector → BigQuery (GCP)

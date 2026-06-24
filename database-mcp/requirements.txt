@@ -1,5 +1,5 @@
-# ── Core (no dependencies needed for mock mode) ──
-# The MCP server uses Python's built-in http.server module.
+# ── Core ──
+fastmcp>=3.0.0               # FastMCP framework for MCP protocol
 
 # ── Production database drivers ──
 oracledb>=2.0.0          # Oracle (thin mode — no Oracle Client needed)
