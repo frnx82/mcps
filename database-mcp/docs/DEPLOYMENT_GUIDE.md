@@ -1,10 +1,18 @@
 # Multi-Database MCP Server — Deployment & Usage Guide
 
+> **v2.0.0 — Powered by [FastMCP](https://github.com/jlowin/fastmcp) ≥ 3.0**
+>
+> This server uses FastMCP's decorator-based API for tool registration and supports
+> **SSE** (Server-Sent Events) and **stdio** transports natively. All MCP protocol
+> handling (JSON-RPC framing, capability negotiation, tool listing) is managed by
+> the framework.
+
 ## Table of Contents
 - [Local Development](#local-development)
 - [Docker Deployment](#docker-deployment)
 - [GDC Deployment](#gdc-deployment)
 - [Connecting an Agent](#connecting-an-agent)
+- [Transport Modes](#transport-modes)
 - [Tool Usage Reference](#tool-usage-reference)
 - [Configuration Reference](#configuration-reference)
 - [Troubleshooting](#troubleshooting)
@@ -14,7 +22,8 @@
 ## Local Development
 
 ### Prerequisites
-- Python 3.9+
+- Python 3.11+ (recommended for FastMCP 3.x)
+- `fastmcp >= 3.0.0` (core dependency)
 - No database drivers needed for mock mode
 
 ### Quick Start (Mock Mode)
@@ -22,7 +31,10 @@
 ```bash
 cd mcps/database-mcp
 
-# Run directly — no pip install needed for mock mode
+# Install core dependency
+pip install fastmcp>=3.0.0
+
+# Run directly — no database drivers needed for mock mode
 python3 main.py --mock
 
 # Or with custom port
@@ -32,21 +44,38 @@ PORT=9090 python3 main.py --mock
 You should see:
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║       Multi-Database MCP Server v1.0.0                      ║
+║       Multi-Database MCP Server v2.0.0 (FastMCP)            ║
 ║       Oracle · Impala · BigQuery · CloudSQL                  ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  Mode:       MOCK (no real connections)                      ║
 ║  Port:       8080                                            ║
 ║  Read-only:  True                                            ║
+║  Row limit:  100 (max 1000)                                  ║
 ╚══════════════════════════════════════════════════════════════╝
-
-🚀 MCP Server listening on http://0.0.0.0:8080
 ```
+
+### FastMCP Dev Mode (Interactive Inspector)
+
+FastMCP provides a built-in development UI for testing tools interactively:
+
+```bash
+# Start the interactive dev inspector
+fastmcp dev main.py
+
+# With arguments
+fastmcp dev main.py -- --mock
+```
+
+This opens a browser-based UI where you can:
+- Browse all registered tools and their schemas
+- Execute tools with custom arguments
+- View responses in real-time
+- Test resources (e.g. `server://info`)
 
 ### Production Mode (Real Databases)
 
 ```bash
-# Install database drivers
+# Install all dependencies (including database drivers)
 pip install -r requirements.txt
 
 # Set connection environment variables
@@ -72,6 +101,9 @@ python3 main.py
 cd mcps/database-mcp
 docker build -t database-mcp:latest .
 ```
+
+> **Note:** The Dockerfile installs `fastmcp>=3.0.0` and all database drivers from `requirements.txt`.
+> The container runs as non-root user (`UID 1000`) for GDC compatibility.
 
 ### Run (Mock Mode)
 
@@ -102,11 +134,11 @@ docker run -p 8080:8080 \
 ### Verify
 
 ```bash
-# Health check
+# Health check (FastMCP exposes /health automatically)
 curl http://localhost:8080/health
 
-# Server info
-curl http://localhost:8080/
+# SSE endpoint (FastMCP's default HTTP transport)
+curl http://localhost:8080/sse
 ```
 
 ---
@@ -157,7 +189,7 @@ kubectl apply -f manifests/deploy.yaml
 # Check pod status
 kubectl get pods -l app=database-mcp
 
-# Check logs
+# Check logs (look for FastMCP startup banner)
 kubectl logs -l app=database-mcp -f
 
 # Port-forward to test locally
@@ -179,6 +211,59 @@ Uncomment the Cloud SQL Auth Proxy sidecar in `deploy.yaml` and update the insta
     - "my-project:us-central1:my-instance"
 ```
 
+### Kubernetes Health Probes
+
+The `deploy.yaml` configures readiness and liveness probes against FastMCP's `/health` endpoint:
+
+```yaml
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 30
+```
+
+---
+
+## Transport Modes
+
+FastMCP supports multiple transport modes. The server auto-selects based on context:
+
+| Transport | When Used | URL Pattern |
+|-----------|-----------|-------------|
+| **SSE** (default for HTTP) | `python main.py` / Docker / K8s | `http://host:8080/sse` |
+| **stdio** | `fastmcp dev main.py` / pipe-based clients | stdin/stdout |
+| **Streamable HTTP** | Future MCP spec support | `http://host:8080/mcp` |
+
+### SSE Transport (Production)
+
+FastMCP starts an SSE server on the configured `PORT` (default 8080). Clients connect to `http://host:8080/sse` for the event stream.
+
+```bash
+# The server exposes SSE at /sse
+python main.py --mock
+# → Listening on http://0.0.0.0:8080/sse
+```
+
+### stdio Transport (Development/Testing)
+
+Used when running under `fastmcp dev` or when a client pipes stdin/stdout directly:
+
+```bash
+# Interactive dev UI (uses stdio internally)
+fastmcp dev main.py -- --mock
+
+# Direct stdio (for pipe-based MCP clients)
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python main.py --mock
+```
+
 ---
 
 ## Connecting an Agent
@@ -188,7 +273,7 @@ Uncomment the Cloud SQL Auth Proxy sidecar in `deploy.yaml` and update the insta
 ```
 ┌──────────────────────────┐     ┌──────────────────────┐
 │     Your AI Agent        │     │  database-mcp        │
-│  (Python/Node.js/etc.)   │────▶│  (HTTP :8080)        │
+│  (Python/Node.js/etc.)   │────▶│  FastMCP (SSE :8080) │
 │                          │     │                      │
 │  1. User asks question   │     │  ┌────────────────┐  │
 │  2. Agent calls MCP tool │     │  │ Oracle         │  │
@@ -198,7 +283,36 @@ Uncomment the Cloud SQL Auth Proxy sidecar in `deploy.yaml` and update the insta
 └──────────────────────────┘     └──────────────────────┘
 ```
 
-### Python Agent Example
+### Python Agent Example (FastMCP Client)
+
+```python
+from fastmcp import Client
+
+async def main():
+    # Connect to the MCP server via SSE
+    async with Client("http://localhost:8080/sse") as client:
+        # List available tools
+        tools = await client.list_tools()
+        print(f"Available tools: {[t.name for t in tools]}")
+
+        # Call a tool
+        result = await client.call_tool("list_databases", {})
+        print(result)
+
+        # Query a database
+        result = await client.call_tool("execute_query", {
+            "database": "oracle",
+            "sql": "SELECT COUNT(*) FROM TRADING.TRADES WHERE TRADE_STATUS='SETTLED'",
+        })
+        print(result)
+
+import asyncio
+asyncio.run(main())
+```
+
+### Python Agent Example (Raw HTTP/JSON-RPC)
+
+For agents not using the FastMCP client library:
 
 ```python
 import json
@@ -241,8 +355,6 @@ print(f"Found {schema['table_count']} tables")
 # Step 2: Send schema + user question to LLM to generate SQL
 # (This is where your LLM/Gemini call goes)
 user_question = "How many trades were settled yesterday?"
-# llm_response = gemini.generate(prompt=f"Given schema: {schema}, write SQL for: {user_question}")
-# generated_sql = llm_response.text
 
 # Step 3: Execute the generated SQL
 result = call_mcp_tool("execute_query", {
@@ -250,9 +362,6 @@ result = call_mcp_tool("execute_query", {
     "sql": "SELECT COUNT(*) as trade_count FROM TRADING.TRADES WHERE TRADE_STATUS='SETTLED' AND TRADE_DATE = TRUNC(SYSDATE-1)",
 })
 print(f"Result: {result['rows']}")
-
-# Step 4: Format and return to user
-# llm_response = gemini.generate(prompt=f"Format this result for the user: {result}")
 ```
 
 ### Using with Gemini API
@@ -316,12 +425,15 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "database-mcp": {
-      "url": "http://localhost:8080",
-      "transport": "http"
+      "url": "http://localhost:8080/sse",
+      "transport": "sse"
     }
   }
 }
 ```
+
+> **Note:** Claude Desktop uses the `/sse` endpoint for SSE transport. Earlier versions
+> used `"transport": "http"` — update to `"sse"` for FastMCP 3.x compatibility.
 
 ### Service Mesh / Internal DNS
 
@@ -341,9 +453,45 @@ http://database-mcp:8080
 
 ## Tool Usage Reference
 
-### List Databases
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `list_databases` | List all configured database connections with health status |
+| `list_schemas` | List schemas/datasets in a database |
+| `list_tables` | List tables in a schema with row counts and sizes |
+| `get_schema_context` | Get table structures for NL→SQL (columns, types, PKs) |
+| `execute_query` | Execute a read-only SQL query |
+
+### Available Resources
+
+| Resource URI | Description |
+|-------------|-------------|
+| `server://info` | Server metadata, version, mode, and configured databases |
+
+### Testing with FastMCP Inspector
+
+The easiest way to test tools is with the built-in dev inspector:
 
 ```bash
+fastmcp dev main.py -- --mock
+```
+
+This opens a browser UI at `http://localhost:5173` where you can click through tools and execute them interactively.
+
+### Testing with curl (JSON-RPC)
+
+```bash
+# List all tools
+curl -s -X POST http://localhost:8080 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list"
+  }' | python3 -m json.tool
+
+# Call list_databases
 curl -s -X POST http://localhost:8080 \
   -H "Content-Type: application/json" \
   -d '{
@@ -354,36 +502,14 @@ curl -s -X POST http://localhost:8080 \
       "name": "list_databases",
       "arguments": {}
     }
-  }'
-```
+  }' | python3 -m json.tool
 
-### List Tables
-
-```bash
+# Execute a query
 curl -s -X POST http://localhost:8080 \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
     "id": 2,
-    "method": "tools/call",
-    "params": {
-      "name": "list_tables",
-      "arguments": {
-        "database": "oracle",
-        "schema": "TRADING"
-      }
-    }
-  }'
-```
-
-### Execute Query
-
-```bash
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 3,
     "method": "tools/call",
     "params": {
       "name": "execute_query",
@@ -393,26 +519,7 @@ curl -s -X POST http://localhost:8080 \
         "limit": 50
       }
     }
-  }'
-```
-
-### Get Schema Context (for NL→SQL)
-
-```bash
-curl -s -X POST http://localhost:8080 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 4,
-    "method": "tools/call",
-    "params": {
-      "name": "get_schema_context",
-      "arguments": {
-        "database": "oracle",
-        "schema": "TRADING"
-      }
-    }
-  }'
+  }' | python3 -m json.tool
 ```
 
 ---
@@ -433,6 +540,15 @@ See [README.md](../README.md#environment-variables) for the complete list of env
 | `QUERY_TIMEOUT_SECONDS` | `30` | Query timeout |
 | `LOG_LEVEL` | `INFO` | Logging verbosity |
 
+### FastMCP-Specific Settings
+
+FastMCP reads these automatically:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `8080` | SSE server port (passed to `mcp.run()`) |
+| `FASTMCP_LOG_LEVEL` | `WARNING` | FastMCP framework log level (separate from app logs) |
+
 ---
 
 ## Troubleshooting
@@ -446,6 +562,8 @@ See [README.md](../README.md#environment-variables) for the complete list of env
 | `Write operation not allowed` | Read-only mode (default) | Set `READ_ONLY=false` if writes are needed |
 | `Query too long` | SQL > 10K chars | Simplify your query |
 | `Database 'x' not found` | Env vars not set for that DB | Check env vars for that database |
+| `ModuleNotFoundError: fastmcp` | FastMCP not installed | Run `pip install fastmcp>=3.0.0` |
+| `SSE connection refused` | Server not running or wrong port | Check `PORT` env var and server logs |
 
 ### Health Check
 
@@ -453,16 +571,36 @@ See [README.md](../README.md#environment-variables) for the complete list of env
 # Quick health check
 curl http://localhost:8080/health
 
-# Detailed server info
-curl http://localhost:8080/
+# Server info via MCP resource
+curl -s -X POST http://localhost:8080 \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"server://info"}}' \
+  | python3 -m json.tool
 ```
 
 ### Logs
 
 ```bash
-# Local
+# Local (app-level debug)
 LOG_LEVEL=DEBUG python3 main.py --mock
+
+# Local (FastMCP framework debug)
+FASTMCP_LOG_LEVEL=DEBUG LOG_LEVEL=DEBUG python3 main.py --mock
 
 # Kubernetes
 kubectl logs -l app=database-mcp -f --tail=100
 ```
+
+### Migration from v1.0 (raw JSON-RPC)
+
+If upgrading from the v1.0 raw HTTP server:
+
+| v1.0.0 (Raw) | v2.0.0 (FastMCP) |
+|---------------|------------------|
+| Manual JSON-RPC routing | Automatic via `@mcp.tool()` decorator |
+| Custom `/health` endpoint | Built-in `/health` from FastMCP |
+| HTTP POST only | SSE + stdio transports |
+| `curl http://host:8080/` | `curl http://host:8080/sse` (for SSE) |
+| No dev UI | `fastmcp dev main.py` interactive inspector |
+| No MCP resources | `@mcp.resource("server://info")` |
+| `requirements.txt`: manual deps | `requirements.txt`: `fastmcp>=3.0.0` as core |
