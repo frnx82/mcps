@@ -1,0 +1,204 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "title", "type": "text", "x": 200, "y": 15, "width": 600, "height": 35,
+      "text": "CVS → GitHub Migration — 10-Week Roadmap",
+      "fontSize": 24, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 100, "version": 1, "versionNonce": 100, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "phase1-box", "type": "rectangle", "x": 30, "y": 80, "width": 220, "height": 280,
+      "strokeColor": "#1971c2", "backgroundColor": "#dbe4ff", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 101, "version": 1, "versionNonce": 101, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase1-header", "type": "rectangle", "x": 30, "y": 80, "width": 220, "height": 45,
+      "strokeColor": "#1971c2", "backgroundColor": "#4263eb", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 102, "version": 1, "versionNonce": 102, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase1-title", "type": "text", "x": 45, "y": 88, "width": 190, "height": 30,
+      "text": "Phase 1: ASSESS\nWeeks 1–2",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#ffffff", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 103, "version": 1, "versionNonce": 103, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "phase1-tasks", "type": "text", "x": 45, "y": 140, "width": 190, "height": 200,
+      "text": "📋 Audit CVS repository\n\n📊 Count files, branches,\n    tags, binary files\n\n👥 Map CVS authors to\n    Git identities\n\n🗂️ Plan repo structure\n    (mono vs multi)\n\n🔧 Select migration tool\n    (cvs2git)\n\n📐 Define branching\n    strategy",
+      "fontSize": 12, "fontFamily": 1, "textAlign": "left",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 104, "version": 1, "versionNonce": 104, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "arrow-1-2", "type": "arrow", "x": 255, "y": 220, "width": 25, "height": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 3, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 105, "version": 1, "versionNonce": 105, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "points": [[0, 0], [25, 0]], "lastCommittedPoint": null,
+      "startBinding": null, "endBinding": null,
+      "startArrowhead": null, "endArrowhead": "arrow", "groupIds": []
+    },
+    {
+      "id": "phase2-box", "type": "rectangle", "x": 285, "y": 80, "width": 220, "height": 280,
+      "strokeColor": "#e8590c", "backgroundColor": "#ffe8cc", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 106, "version": 1, "versionNonce": 106, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase2-header", "type": "rectangle", "x": 285, "y": 80, "width": 220, "height": 45,
+      "strokeColor": "#e8590c", "backgroundColor": "#e8590c", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 107, "version": 1, "versionNonce": 107, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase2-title", "type": "text", "x": 300, "y": 88, "width": 190, "height": 30,
+      "text": "Phase 2: MIGRATE\nWeeks 3–6",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#ffffff", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 108, "version": 1, "versionNonce": 108, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "phase2-tasks", "type": "text", "x": 300, "y": 140, "width": 190, "height": 200,
+      "text": "🔄 Run cvs2git conversion\n\n🧹 Clean up large binaries\n    with BFG Repo-Cleaner\n\n📦 Set up Git LFS for\n    DLLs, .lib, .pdb files\n\n⚙️ Configure GitHub\n    Actions CI/CD\n\n🤖 Enable Copilot for\n    all developers\n\n🔐 Set up SSO, teams,\n    permissions",
+      "fontSize": 12, "fontFamily": 1, "textAlign": "left",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 109, "version": 1, "versionNonce": 109, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "arrow-2-3", "type": "arrow", "x": 510, "y": 220, "width": 25, "height": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 3, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 110, "version": 1, "versionNonce": 110, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "points": [[0, 0], [25, 0]], "lastCommittedPoint": null,
+      "startBinding": null, "endBinding": null,
+      "startArrowhead": null, "endArrowhead": "arrow", "groupIds": []
+    },
+    {
+      "id": "phase3-box", "type": "rectangle", "x": 540, "y": 80, "width": 220, "height": 280,
+      "strokeColor": "#862e9c", "backgroundColor": "#e5dbff", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 111, "version": 1, "versionNonce": 111, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase3-header", "type": "rectangle", "x": 540, "y": 80, "width": 220, "height": 45,
+      "strokeColor": "#862e9c", "backgroundColor": "#862e9c", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 112, "version": 1, "versionNonce": 112, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase3-title", "type": "text", "x": 555, "y": 88, "width": 190, "height": 30,
+      "text": "Phase 3: VALIDATE\nWeeks 7–9",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#ffffff", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 113, "version": 1, "versionNonce": 113, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "phase3-tasks", "type": "text", "x": 555, "y": 140, "width": 190, "height": 200,
+      "text": "✔️ Verify commit history\n    matches CVS\n\n✔️ Compare file counts\n    and integrity\n\n📚 Developer training\n    (2-3 workshops)\n\n👥 Pilot team (5-8 devs)\n    works in GitHub\n\n📖 Document new Git\n    workflows for DEP\n\n🧪 Test CI/CD builds\n    end-to-end",
+      "fontSize": 12, "fontFamily": 1, "textAlign": "left",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 114, "version": 1, "versionNonce": 114, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "arrow-3-4", "type": "arrow", "x": 765, "y": 220, "width": 25, "height": 0,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 3, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 115, "version": 1, "versionNonce": 115, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "points": [[0, 0], [25, 0]], "lastCommittedPoint": null,
+      "startBinding": null, "endBinding": null,
+      "startArrowhead": null, "endArrowhead": "arrow", "groupIds": []
+    },
+    {
+      "id": "phase4-box", "type": "rectangle", "x": 795, "y": 80, "width": 220, "height": 280,
+      "strokeColor": "#2f9e44", "backgroundColor": "#b2f2bb", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 116, "version": 1, "versionNonce": 116, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase4-header", "type": "rectangle", "x": 795, "y": 80, "width": 220, "height": 45,
+      "strokeColor": "#2f9e44", "backgroundColor": "#2f9e44", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 117, "version": 1, "versionNonce": 117, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "phase4-title", "type": "text", "x": 810, "y": 88, "width": 190, "height": 30,
+      "text": "Phase 4: CUTOVER\nWeek 10",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#ffffff", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 118, "version": 1, "versionNonce": 118, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "phase4-tasks", "type": "text", "x": 810, "y": 140, "width": 190, "height": 200,
+      "text": "🔄 Final CVS sync\n    (last commits)\n\n🔒 Set CVS to\n    READ-ONLY\n\n📢 Announce cutover\n    to all developers\n\n🚀 All development\n    moves to GitHub\n\n📁 Keep CVS archive\n    for 6-12 months\n\n🎉 GO LIVE!",
+      "fontSize": 12, "fontFamily": 1, "textAlign": "left",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 119, "version": 1, "versionNonce": 119, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "post-box", "type": "rectangle", "x": 30, "y": 390, "width": 985, "height": 45,
+      "strokeColor": "#1971c2", "backgroundColor": "#a5d8ff", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 120, "version": 1, "versionNonce": 120, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "post-text", "type": "text", "x": 250, "y": 402, "width": 545, "height": 20,
+      "text": "📌 Post-Cutover: 30-day support period — troubleshoot, optimize, train",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 121, "version": 1, "versionNonce": 121, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

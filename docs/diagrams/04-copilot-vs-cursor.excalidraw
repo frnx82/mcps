@@ -1,0 +1,149 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "title", "type": "text", "x": 180, "y": 15, "width": 500, "height": 35,
+      "text": "GitHub Copilot vs Cursor AI — For Visual Studio C++",
+      "fontSize": 22, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 300, "version": 1, "versionNonce": 300, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "copilot-box", "type": "rectangle", "x": 30, "y": 70, "width": 380, "height": 450,
+      "strokeColor": "#2f9e44", "backgroundColor": "#ebfbee", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 301, "version": 1, "versionNonce": 301, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "copilot-header", "type": "rectangle", "x": 30, "y": 70, "width": 380, "height": 50,
+      "strokeColor": "#2f9e44", "backgroundColor": "#2f9e44", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 302, "version": 1, "versionNonce": 302, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "copilot-title", "type": "text", "x": 90, "y": 80, "width": 260, "height": 30,
+      "text": "✅ GitHub Copilot — $19/user/mo",
+      "fontSize": 18, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#ffffff", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 303, "version": 1, "versionNonce": 303, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "vs-icon-copilot", "type": "rectangle", "x": 70, "y": 140, "width": 300, "height": 55,
+      "strokeColor": "#2f9e44", "backgroundColor": "#b2f2bb", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 304, "version": 1, "versionNonce": 304, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "vs-icon-copilot-text", "type": "text", "x": 85, "y": 150, "width": 270, "height": 35,
+      "text": "✅ Runs INSIDE Visual Studio 2022\nNative integration — zero friction",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#2b8a3e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 305, "version": 1, "versionNonce": 305, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "copilot-features", "type": "text", "x": 55, "y": 215, "width": 330, "height": 280,
+      "text": "✅ Uses MSVC debugger natively\n\n✅ IntelliSense-powered suggestions\n\n✅ MSBuild / .sln / .vcxproj support\n\n✅ PR code review on GitHub\n\n✅ @Modernize agent for C++\n\n✅ IP indemnity (legal protection)\n\n✅ Code completions — UNLIMITED\n\n✅ One tool, one login, one workflow\n\n✅ Backed by Microsoft\n\n💰 50 devs = $11,400/year\n💰 75 devs = $17,100/year",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "left",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 306, "version": 1, "versionNonce": 306, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "vs-text", "type": "text", "x": 440, "y": 265, "width": 30, "height": 25,
+      "text": "VS",
+      "fontSize": 18, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 307, "version": 1, "versionNonce": 307, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "cursor-box", "type": "rectangle", "x": 480, "y": 70, "width": 380, "height": 450,
+      "strokeColor": "#e03131", "backgroundColor": "#fff5f5", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 308, "version": 1, "versionNonce": 308, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "cursor-header", "type": "rectangle", "x": 480, "y": 70, "width": 380, "height": 50,
+      "strokeColor": "#e03131", "backgroundColor": "#e03131", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 309, "version": 1, "versionNonce": 309, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "cursor-title", "type": "text", "x": 540, "y": 80, "width": 260, "height": 30,
+      "text": "❌ Cursor AI — $40/user/mo",
+      "fontSize": 18, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#ffffff", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 310, "version": 1, "versionNonce": 310, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "vs-icon-cursor", "type": "rectangle", "x": 520, "y": 140, "width": 300, "height": 55,
+      "strokeColor": "#e03131", "backgroundColor": "#ffc9c9", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 311, "version": 1, "versionNonce": 311, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "vs-icon-cursor-text", "type": "text", "x": 535, "y": 150, "width": 270, "height": 35,
+      "text": "❌ CANNOT run in Visual Studio\nIt's a separate VS Code fork editor",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#c92a2a", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 312, "version": 1, "versionNonce": 312, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "cursor-features", "type": "text", "x": 505, "y": 215, "width": 330, "height": 280,
+      "text": "❌ No MSVC debugger support\n\n❌ No native MSBuild integration\n\n❌ No .sln / .vcxproj support\n\n❌ No IP indemnity\n\n⚠️ Requires \"hybrid\" workflow\n    (VS + Cursor side by side)\n\n✅ Multi-file refactoring (Composer)\n\n✅ Multiple AI model choices\n\n⚠️ Still needs GitHub for VCS\n\n💰 50 devs = $24,000/year (+$12,600)\n💰 75 devs = $36,000/year (+$18,900)\n\n⚠️ 2x the cost, no VS integration",
+      "fontSize": 14, "fontFamily": 1, "textAlign": "left",
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 313, "version": 1, "versionNonce": 313, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    },
+    {
+      "id": "verdict-box", "type": "rectangle", "x": 30, "y": 545, "width": 830, "height": 55,
+      "strokeColor": "#2f9e44", "backgroundColor": "#b2f2bb", "fillStyle": "solid",
+      "strokeWidth": 3, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 314, "version": 1, "versionNonce": 314, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false,
+      "roundness": { "type": 3 }, "groupIds": []
+    },
+    {
+      "id": "verdict-text", "type": "text", "x": 100, "y": 557, "width": 690, "height": 28,
+      "text": "🏆 VERDICT: GitHub Copilot — works in your IDE, half the cost, backed by Microsoft",
+      "fontSize": 18, "fontFamily": 1, "textAlign": "center",
+      "strokeColor": "#2b8a3e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 1, "opacity": 100, "angle": 0,
+      "seed": 315, "version": 1, "versionNonce": 315, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "groupIds": []
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
