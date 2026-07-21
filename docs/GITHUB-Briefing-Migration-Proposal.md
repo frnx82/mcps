@@ -48,9 +48,9 @@ Copilot is an AI assistant that sits inside the developer's editor (Visual Studi
 
 ![Annual Investment Breakdown](images/table_annual_cost_1784555443076.png)
 
-### Year 1 (Including Migration)
+### Annual Subscription Cost
 
-![Year 1 Investment Including Migration](images/brief_year1_cost_1784559391193.png)
+![Annual Investment](images/brief_year1_cost_v2_1784593637253.png)
 
 ---
 
