@@ -1,5 +1,5 @@
-# Modernizing Morpher's Development Infrastructure
-## A Proposal for Detroit Engineered Products
+# Modernizing the application's Development Infrastructure
+## A Proposal for the organization
 
 > **Date:** July 2026  
 > **Read time:** 10 minutes  
@@ -9,7 +9,7 @@
 
 ## Why This Document Exists
 
-DEP's flagship product **Morpher** — a Computer-Aided Engineering application with **20+ years of development history** — currently runs on a source code management system called **CVS** (Concurrent Versions System).
+the organization's flagship product **the application** — a Computer-Aided Engineering application with **20+ years of development history** — currently runs on a source code management system called **CVS** (Concurrent Versions System).
 
 CVS was created in **1986** and has had **no active development since 2008**. It is now considered obsolete by the software industry.
 
@@ -136,6 +136,6 @@ The migration takes **10 weeks** and is designed to be **zero-risk**:
 ---
 
 > *Supporting documentation available:*
-> - *[Technical Details — Full Report](DEP-CVS-to-GitHub-Migration-Detailed-Report.md) (94 KB, 17 sections)*
-> - *[Technical Q&A — 65+ Questions Answered](DEP-Technical-QA-Team-Discussion.md)*
+> - *[Technical Details — Full Report](CVS-to-GitHub-Migration-Detailed-Report.md) (94 KB, 17 sections)*
+> - *[Technical Q&A — 65+ Questions Answered](Technical-QA-Team-Discussion.md)*
 > - *[Interactive Diagrams](diagrams/) (Excalidraw)*

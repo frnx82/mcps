@@ -1,16 +1,16 @@
 # CVS → GitHub Migration — Executive Summary
-## Detroit Engineered Products — Morpher Application
+## the organization — the application Application
 
-> **For:** DEP Engineering Team Presentation  
+> **For:** the organization Engineering Team Presentation  
 > **Date:** July 2026 | **Read time:** 5 minutes
 
 ---
 
 ## The Situation
 
-DEP has used **CVS** for source control for **20+ years**. CVS was created in 1986 and has had no active development since 2008. It is now considered **obsolete**.
+the organization has used **CVS** for source control for **20+ years**. CVS was created in 1986 and has had no active development since 2008. It is now considered **obsolete**.
 
-**Morpher** is a complex C++ desktop application that needs modern tools to remain competitive.
+**the application** is a complex C++ desktop application that needs modern tools to remain competitive.
 
 ---
 
@@ -48,7 +48,7 @@ The team has asked about Cursor AI as an alternative. Here's the key difference:
 | **Requires GitHub anyway?** | Included | Yes — still need GitHub |
 | **IP legal protection** | ✅ Yes | ❌ No |
 
-> **Bottom line:** Cursor cannot run inside Visual Studio. Since DEP's entire team uses Visual Studio for C++ development, **Copilot is the only option that works without changing IDEs**.
+> **Bottom line:** Cursor cannot run inside Visual Studio. Since the organization's entire team uses Visual Studio for C++ development, **Copilot is the only option that works without changing IDEs**.
 
 ---
 
@@ -161,4 +161,4 @@ Artifacts (EXE/DLL) saved
 
 ---
 
-*Full technical details available in the [Detailed Report](file:///Users/rajeshellappan/.gemini/antigravity-ide/brain/22393411-b15f-4878-826e-963c89459e12/DEP-CVS-to-GitHub-Migration-Detailed-Report.md).*
+*Full technical details available in the [Detailed Report](file:///Users/rajeshellappan/.gemini/antigravity-ide/brain/22393411-b15f-4878-826e-963c89459e12/CVS-to-GitHub-Migration-Detailed-Report.md).*

@@ -1,8 +1,8 @@
 # GitHub Copilot for C++ CAE Development
 ## Code Review, IDE Integration, AI Models & Cost Guide
 
-> **For:** Detroit Engineered Products — Engineering & Management Teams  
-> **Product:** Morpher (C++ Computer-Aided Engineering Desktop Application)  
+> **For:** the organization — Engineering & Management Teams  
+> **Product:** the application (C++ Computer-Aided Engineering Desktop Application)  
 > **Date:** July 2026  
 > **Focus:** Copilot capabilities for complex C++ code, review rules, models, and costs
 
@@ -20,7 +20,7 @@
 8. [Copilot Plans — Business vs Enterprise](#8-copilot-plans--business-vs-enterprise)
 9. [Cost Analysis — 50 Developers, High Usage](#9-cost-analysis--50-developers-high-usage)
 10. [Setting Up Copilot Review Rules for C++ Apps](#10-setting-up-copilot-review-rules-for-c-apps)
-11. [Complete copilot-instructions.md for Morpher](#11-complete-copilot-instructionsmd-for-morpher)
+11. [Complete copilot-instructions.md for the application](#11-complete-copilot-instructionsmd-for-morpher)
 
 ---
 
@@ -46,7 +46,7 @@ Copilot reviews pull requests automatically when a developer pushes code. It rea
 
 ### Template Metaprogramming — Detailed Breakdown
 
-Since Morpher likely uses significant TMP for performance:
+Since the application likely uses significant TMP for performance:
 
 ![Template Metaprogramming — Copilot Capability](images/cpp_tmp_breakdown_1784560010517.png)
 
@@ -182,7 +182,7 @@ Visual Studio has a built-in Static Analysis tool (`/analyze` flag). Here's how 
 
 ![Productivity Impact — Research Data](images/cpp_research_data_1784560104723.png)
 
-> **Important nuance for DEP:** The 19% slowdown finding applies to senior engineers verifying AI output on complex, mature codebases — exactly the Morpher scenario. This is temporary (2–4 weeks) and is offset by massive gains in boilerplate, testing, and documentation. The net effect over 3+ months is strongly positive.
+> **Important nuance for your organization:** The 19% slowdown finding applies to senior engineers verifying AI output on complex, mature codebases — exactly this scenario. This is temporary (2–4 weeks) and is offset by massive gains in boilerplate, testing, and documentation. The net effect over 3+ months is strongly positive.
 
 ---
 
@@ -210,7 +210,7 @@ Developers can switch between models using the **model picker** dropdown in Copi
 
 ![Copilot Business vs Enterprise](images/cpp_business_vs_enterprise_1784556923931.png)
 
-### Recommendation for DEP
+### Recommendation
 
 ![Cost Analysis — 50 Developers, All Scenarios](images/cpp_cost_scenarios_1784560145920.png)
 
@@ -255,7 +255,7 @@ Not all 50 developers will be heavy users. Realistic distribution:
 Copilot reads review rules from files in the `.github/` directory of your repository:
 
 ```
-Morpher/
+the application/
 ├── .github/
 │   ├── copilot-instructions.md          ← Global review rules (all files)
 │   ├── instructions/
@@ -321,15 +321,15 @@ Copilot also reads from these files if they exist:
 
 ---
 
-## 11. Complete copilot-instructions.md for Morpher
+## 11. Complete copilot-instructions.md for the application
 
-Below is a **ready-to-use** `copilot-instructions.md` file tailored for a complex C++ CAE application like Morpher. Place this in `.github/copilot-instructions.md`:
+Below is a **ready-to-use** `copilot-instructions.md` file tailored for a complex C++ CAE application like the application. Place this in `.github/copilot-instructions.md`:
 
 ```markdown
-# Copilot Instructions — Morpher (DEP)
+# Copilot Instructions — the application (the organization)
 
 ## Project Overview
-Morpher is a C++ desktop application for Computer-Aided Engineering (CAE),
+the application is a C++ desktop application for Computer-Aided Engineering (CAE),
 including finite element analysis, mesh generation, and optimization.
 Built with Visual C++ (MSVC), targeting Windows x64.
 Codebase is 20+ years old with a mix of legacy C++ and modern C++17 patterns.
@@ -349,7 +349,7 @@ Codebase is 20+ years old with a mix of legacy C++ and modern C++17 patterns.
 - Flag any missing virtual destructor in base classes
 
 ## Threading & Parallelism
-- Morpher uses OpenMP for parallelization
+- the application uses OpenMP for parallelization
 - ALWAYS verify shared variables in `#pragma omp parallel` blocks
 - Flag any shared mutable state accessed without `#pragma omp critical` or `omp_lock_t`
 - Flag any non-thread-safe STL container access in parallel regions
@@ -483,8 +483,8 @@ Additional rules for file import/export:
 
 ---
 
-> *This document is part of the DEP migration documentation suite. See also:*
+> *This document is part of the the migration documentation suite. See also:*
 > - *[CEO Briefing](GITHUB-Briefing-Migration-Proposal.md)*
-> - *[Technical Details — Full Report](DEP-CVS-to-GitHub-Migration-Detailed-Report.md)*
-> - *[Technical Q&A — 65+ Questions](DEP-Technical-QA-Team-Discussion.md)*
-> - *[Executive Summary](DEP-Executive-Summary-Team-Presentation.md)*
+> - *[Technical Details — Full Report](CVS-to-GitHub-Migration-Detailed-Report.md)*
+> - *[Technical Q&A — 65+ Questions](Technical-QA-Team-Discussion.md)*
+> - *[Executive Summary](Executive-Summary-Team-Presentation.md)*

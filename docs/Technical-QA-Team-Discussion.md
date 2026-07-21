@@ -1,9 +1,9 @@
-# DEP Migration — Technical Q&A for Team Discussion
-## Detroit Engineered Products — Morpher Application
+# the organization Migration — Technical Q&A for Team Discussion
+## the organization — the application Application
 
 > **For:** Technical team discussions, management review, stakeholder Q&A  
 > **Date:** July 2026 | **Sections:** 12 categories, 75+ questions  
-> **Companion to:** [Detailed Report](DEP-CVS-to-GitHub-Migration-Detailed-Report.md) | [Executive Summary](DEP-Executive-Summary-Team-Presentation.md) | [Copilot C++ Guide](DEP-Copilot-CPP-Review-Models-Cost-Guide.md)
+> **Companion to:** [Detailed Report](CVS-to-GitHub-Migration-Detailed-Report.md) | [Executive Summary](Executive-Summary-Team-Presentation.md) | [Copilot C++ Guide](Copilot-CPP-Review-Models-Cost-Guide.md)
 
 ---
 
@@ -142,7 +142,7 @@ Migration is a one-time cost. Year 2 onwards is just the subscription.
 | Works in Visual Studio? | ✅ Yes | ❌ No |
 | 3-year savings | — | **$37,800–$56,700 more expensive** |
 
-Cursor is a VS Code fork — it **cannot run inside Visual Studio**. DEP would need to change IDEs entirely.
+Cursor is a VS Code fork — it **cannot run inside Visual Studio**. The organization would need to change IDEs entirely.
 
 ---
 
@@ -199,7 +199,7 @@ There's no fixed "per request" price — it depends on how much text (tokens) go
 | Set per-user credit limits | Hard stop when individual limit reached |
 | Set organization spending cap | $0 overage = zero surprise bills |
 
-**Recommended for DEP:** Allow GPT-5 mini + Claude Sonnet by default. Require manager approval for Opus/GPT-5.5 access.
+**Recommended for your organization:** Allow GPT-5 mini + Claude Sonnet by default. Require manager approval for Opus/GPT-5.5 access.
 
 ---
 
@@ -490,7 +490,7 @@ PROPOSED: All 3 layers → bugs caught before release
 Create a `.github/copilot-instructions.md` file in your repository root. This file tells Copilot what rules to enforce during code review and chat assistance:
 
 ```markdown
-# Copilot Instructions for Morpher
+# Copilot Instructions for the application
 
 ## Memory Management
 - Flag any use of raw `new`/`delete` — suggest `std::unique_ptr` or `std::shared_ptr`
@@ -553,7 +553,7 @@ Create a `.github/copilot-instructions.md` file in your repository root. This fi
 
 ---
 
-### Q5.4: What is CODEOWNERS and how do we use it for Morpher?
+### Q5.4: What is CODEOWNERS and how do we use it for the application?
 
 A `CODEOWNERS` file defines who must review changes to specific parts of the codebase:
 
@@ -595,7 +595,7 @@ Pull Request created automatically
         │      Comments on: memory, style, performance, bugs
         │
         ├─── ✅ CI Build (self-hosted runner, automated)
-        │      Compiles Morpher, runs unit tests
+        │      Compiles the application, runs unit tests
         │
         ├─── ✅ CODEOWNERS Review (human, required)
         │      Module owner approves domain-specific changes
@@ -757,7 +757,7 @@ There is **zero downtime**. CVS stays active until the team is ready.
 | Option | Pros | Cons | Cost |
 |--------|------|------|------|
 | **Internal team** | Knows the codebase | Learning curve with Git migration | $0 (team time) |
-| **External consultant** | Expert in CVS→Git migrations | Doesn't know Morpher specifics | $10K–$20K |
+| **External consultant** | Expert in CVS→Git migrations | Doesn't know the application specifics | $10K–$20K |
 | **Hybrid** | Best of both | Coordination overhead | $5K–$10K |
 
 **Recommended:** Hybrid — hire a Git migration consultant for 2–3 weeks to guide the internal team through Phases 1–2.
@@ -782,7 +782,7 @@ There is **zero downtime**. CVS stays active until the team is ready.
 
 ### Q8.2: What about our DLL dependencies?
 
-DEP likely has three types of binary files:
+the organization likely has three types of binary files:
 
 | Type | Current Location | Recommended Solution |
 |------|-----------------|---------------------|
@@ -872,15 +872,15 @@ DEP likely has three types of binary files:
 
 ## 10. Build Times & Runners
 
-### Q10.1: Self-hosted vs cloud runners — which should DEP use?
+### Q10.1: Self-hosted vs cloud runners — which should the organization use?
 
-**Self-hosted runners are recommended for DEP.** Here's why:
+**Self-hosted runners are recommended for your organization.** Here's why:
 
 | Factor | Self-Hosted Runner | GitHub-Hosted Runner |
 |--------|-------------------|---------------------|
 | **Cost** | Your hardware + $0.002/min orchestration | $0.016–$0.064/min |
 | **Performance** | ⚡ Fastest (your hardware, local cache) | Standard (shared infra) |
-| **Toolchain** | Pre-installed MSVC, SDKs, Morpher deps | Must install every build |
+| **Toolchain** | Pre-installed MSVC, SDKs, the application deps | Must install every build |
 | **Caching** | Persistent NVMe cache (sccache) | Cache actions (slower) |
 | **Security** | Code stays on your network | Code sent to GitHub cloud |
 | **Maintenance** | You manage Windows updates, security | GitHub manages |
@@ -888,7 +888,7 @@ DEP likely has three types of binary files:
 
 ---
 
-### Q10.2: How long will Morpher builds take?
+### Q10.2: How long will the application builds take?
 
 Build times depend on the project size and hardware. Here are estimates:
 
@@ -913,7 +913,7 @@ Build times depend on the project size and hardware. Here are estimates:
 | **OS** | Windows Server 2019 | Windows Server 2022 |
 | **Network** | 100 Mbps | 1 Gbps (for git clone + artifact upload) |
 
-**Can use existing build servers.** If DEP already has Windows build machines, install the GitHub Actions runner agent on them — no new hardware needed.
+**Can use existing build servers.** If the organization already has Windows build machines, install the GitHub Actions runner agent on them — no new hardware needed.
 
 ---
 
@@ -1120,8 +1120,8 @@ Based on published research studies (Microsoft, Accenture, GitHub internal data)
 | Automotive OEMs (GM, Ford) | GitHub/GitLab + AI tools |
 | Aerospace (Boeing, Airbus suppliers) | GitHub Enterprise + Copilot |
 | CAE Software Companies | GitHub/GitLab + CI/CD |
-| DEP (current) | CVS (1986) — ⚠️ **20+ years behind industry** |
-| DEP (proposed) | GitHub Enterprise + Copilot — **Industry standard** |
+| the organization (current) | CVS (1986) — ⚠️ **20+ years behind industry** |
+| the organization (proposed) | GitHub Enterprise + Copilot — **Industry standard** |
 
 ---
 
@@ -1185,6 +1185,6 @@ When you see ROI:    Within 2–4 months
 
 ---
 
-*For full technical details, see the [Detailed Report](DEP-CVS-to-GitHub-Migration-Detailed-Report.md).*  
-*For a quick executive overview, see the [Executive Summary](DEP-Executive-Summary-Team-Presentation.md).*  
+*For full technical details, see the [Detailed Report](CVS-to-GitHub-Migration-Detailed-Report.md).*  
+*For a quick executive overview, see the [Executive Summary](Executive-Summary-Team-Presentation.md).*  
 *For interactive diagrams, see the [diagrams/](diagrams/) folder.*

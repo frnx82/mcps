@@ -1,5 +1,5 @@
 # CVS to GitHub Migration — Detailed Technical Report
-## Detroit Engineered Products (DEP) — Morpher C++ Application
+## the organization — the application C++ Application
 
 > **Date:** July 2026  
 > **Scope:** Migration from CVS to GitHub, Copilot Integration, CI/CD, Cost Analysis
@@ -15,7 +15,7 @@
 5. [Visual Studio C++ Integration — 2017 vs 2022](#5-visual-studio-c-integration--2017-vs-2022)
 6. [Copilot vs Traditional VS Debugging — How They Complement Each Other](#6-copilot-vs-traditional-vs-debugging--how-they-complement-each-other)
 7. [Cost Analysis — GitHub Enterprise + Copilot for 50–75 Developers](#7-cost-analysis--github-enterprise--copilot-for-5075-developers)
-8. [GitHub Copilot vs Cursor AI — Comparison & Why Copilot Wins for DEP](#8-github-copilot-vs-cursor-ai--comparison--why-copilot-wins-for-dep)
+8. [GitHub Copilot vs Cursor AI — Comparison & Why Copilot Wins for your organization](#8-github-copilot-vs-cursor-ai--comparison--why-copilot-wins-for-dep)
 9. [Detailed Copilot Usage Cost — Daily / Monthly / Yearly for 50–75 Developers](#9-detailed-copilot-usage-cost--daily--monthly--yearly-for-5075-developers)
 10. [GitHub Actions Runners — C++ Build Costs](#10-github-actions-runners--c-build-costs)
 11. [Migration Plan — CVS to GitHub](#11-migration-plan--cvs-to-github)
@@ -30,11 +30,11 @@
 
 ## 1. Executive Summary
 
-Detroit Engineered Products has relied on CVS (Concurrent Versions System) for 20+ years to manage the source code for **Morpher**, a complex C++ desktop application for Computer-Aided Engineering (CAE). While CVS served its purpose, it is now considered **obsolete** by the software industry. Migrating to **GitHub** with **GitHub Copilot** integration will provide:
+the organization has relied on CVS (Concurrent Versions System) for 20+ years to manage the source code for **the application**, a complex C++ desktop application for Computer-Aided Engineering (CAE). While CVS served its purpose, it is now considered **obsolete** by the software industry. Migrating to **GitHub** with **GitHub Copilot** integration will provide:
 
 - **Modern collaboration** — Pull requests, code reviews, branching workflows
 - **AI-assisted development** — GitHub Copilot for code suggestions, reviews, and modernization
-- **Automated CI/CD** — GitHub Actions for building, testing, and releasing Morpher
+- **Automated CI/CD** — GitHub Actions for building, testing, and releasing the application
 - **Enterprise security** — SAML SSO, audit logs, branch protection, IP whitelisting
 - **Industry standard tooling** — Access to the world's largest developer ecosystem
 
@@ -49,7 +49,7 @@ Detroit Engineered Products has relied on CVS (Concurrent Versions System) for 2
 
 CVS was created in **1986** and last had a significant release in **2008**. After 20+ years of use:
 
-| Problem | Impact on DEP |
+| Problem | Impact on the organization |
 |---------|---------------|
 | **No branching model** | CVS branching is slow, error-prone, and discourages parallel development |
 | **No atomic commits** | A commit in CVS is per-file, not per-changeset — partial commits can corrupt the repository |
@@ -127,7 +127,7 @@ CVS was created in **1986** and last had a significant release in **2008**. Afte
 
 ### 4.1 Overview
 
-GitHub Copilot is an AI-powered development assistant that integrates directly into the IDE and the GitHub pull request workflow. For a C++ CAE application like Morpher, it provides two major capabilities:
+GitHub Copilot is an AI-powered development assistant that integrates directly into the IDE and the GitHub pull request workflow. For a C++ CAE application like the application, it provides two major capabilities:
 
 1. **In-IDE assistance** — Real-time code suggestions, chat, and modernization
 2. **Pull request review** — Automated review comments on every code change
@@ -136,7 +136,7 @@ GitHub Copilot is an AI-powered development assistant that integrates directly i
 
 #### ✅ What Copilot Handles Well (High Confidence)
 
-| Review Category | Examples for Morpher C++ |
+| Review Category | Examples for the application C++ |
 |----------------|--------------------------|
 | **Code quality** | Naming conventions, unused variables, dead code detection |
 | **Modern C++ patterns** | Suggests `std::unique_ptr` over raw `new/delete`, range-based for loops, `auto` usage |
@@ -164,12 +164,12 @@ GitHub Copilot is an AI-powered development assistant that integrates directly i
 |------|------------------------|
 | **CAE algorithm correctness** | Cannot verify finite element math, mesh quality algorithms, or solver convergence |
 | **Domain-specific logic** | Doesn't understand engineering physics, material models, or optimization algorithms |
-| **Architecture decisions** | Cannot evaluate if a design pattern is appropriate for Morpher's architecture |
+| **Architecture decisions** | Cannot evaluate if a design pattern is appropriate for the application's architecture |
 | **Security-critical code** | Should not be sole reviewer for licensing, encryption, or auth code |
 | **Complex buffer overflows** | Not a formal verification engine — use CodeQL/static analysis tools |
 | **Business requirements** | Cannot validate if code meets customer specifications |
 
-### 4.3 Example: Copilot Review on a Morpher Pull Request
+### 4.3 Example: Copilot Review on the application Pull Request
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -204,7 +204,7 @@ GitHub Copilot is an AI-powered development assistant that integrates directly i
 ### 4.4 Complexity Levels Copilot Can Handle
 
 ```
-Complexity Level    │ Copilot Effectiveness │ Example in Morpher
+Complexity Level    │ Copilot Effectiveness │ Example in the application
 ────────────────────┼───────────────────────┼──────────────────────────────
 Low                 │ ████████████ 95%      │ Variable naming, code style,
                     │                       │ missing includes, typos
@@ -253,7 +253,7 @@ GitHub Copilot is **natively integrated** into Visual Studio 2022 (version 17.10
 > [!WARNING]
 > **Visual Studio 2017 does NOT support GitHub Copilot.** There is no workaround, extension, or plugin available. To use Copilot, developers **must** use Visual Studio 2022 (17.10+).
 
-### 5.3 Recommendation for DEP
+### 5.3 Recommendation
 
 | Current Setup | Recommended Action |
 |--------------|-------------------|
@@ -382,18 +382,18 @@ A common question: *"We already have debugging in Visual Studio. What does Copil
 
 ---
 
-## 8. GitHub Copilot vs Cursor AI — Comparison & Why Copilot Wins for DEP
+## 8. GitHub Copilot vs Cursor AI — Comparison & Why Copilot Wins for your organization
 
 ### 8.1 What Is Cursor AI?
 
 Cursor is a standalone AI-native code editor built as a **fork of VS Code** (not Visual Studio). It offers powerful AI features — multi-file editing, autonomous agents ("Composer"), and codebase-wide understanding. Some developers consider it the most capable AI coding tool available.
 
-**However, for DEP's specific situation, Cursor has critical limitations.**
+**However, for the organization's specific situation, Cursor has critical limitations.**
 
 ### 8.2 The Dealbreaker: Cursor Does NOT Support Visual Studio IDE
 
 > [!CAUTION]
-> **Cursor cannot be installed in or integrated with Visual Studio 2022 (or 2017).** It is a completely separate editor. This is the single most important factor for DEP.
+> **Cursor cannot be installed in or integrated with Visual Studio 2022 (or 2017).** It is a completely separate editor. This is the single most important factor for your organization.
 
 | Question | Answer |
 |----------|--------|
@@ -411,7 +411,7 @@ This adds complexity and friction — especially for a 50–75 developer team th
 
 ### 8.3 Full Feature Comparison
 
-| Feature | GitHub Copilot | Cursor AI | Winner for DEP |
+| Feature | GitHub Copilot | Cursor AI | Winner for your organization |
 |---------|---------------|-----------|----------------|
 | **Visual Studio 2022 support** | ✅ Native integration | ❌ Not supported | 🏆 Copilot |
 | **Visual Studio 2017 support** | ❌ Not supported | ❌ Not supported | Tie (both need VS 2022) |
@@ -467,11 +467,11 @@ This adds complexity and friction — especially for a 50–75 developer team th
 | **Annual Total** | **$36,000** | **$54,900** |
 | **Difference** | — | **+$18,900/yr more** |
 
-### 8.5 The "Hybrid" Argument — Why It Doesn't Work for DEP
+### 8.5 The "Hybrid" Argument — Why It Doesn't Work for your organization
 
 Some teams argue: "Use both! GitHub + Copilot for PR reviews, and Cursor for editing."
 
-| Factor | Why This Is Problematic for DEP |
+| Factor | Why This Is Problematic for your organization |
 |--------|--------------------------------|
 | **Double cost** | Paying for both Copilot ($19) + Cursor ($40) = $59/user/mo |
 | **Double training** | Team must learn two AI tools simultaneously |
@@ -480,12 +480,12 @@ Some teams argue: "Use both! GitHub + Copilot for PR reviews, and Cursor for edi
 | **Support burden** | IT supports two AI platforms instead of one |
 | **For 75 devs** | Extra $36,000/yr for Cursor on top of Copilot |
 
-### 8.6 Recommendation: Copilot for DEP
+### 8.6 Recommendation: Copilot for your organization
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                                                                     │
-│   DEP's Stack:   Visual Studio 2022 + C++ + MSBuild + Windows      │
+│   the organization's Stack:   Visual Studio 2022 + C++ + MSBuild + Windows      │
 │                                                                     │
 │   Copilot:  ✅ Works inside Visual Studio                           │
 │             ✅ Uses VS debugger, MSBuild, IntelliSense              │
@@ -498,13 +498,13 @@ Some teams argue: "Use both! GitHub + Copilot for PR reviews, and Cursor for edi
 │             ❌ 2x the cost + still need GitHub anyway              │
 │             ❌ More complexity for 50-75 developers                 │
 │                                                                     │
-│   Verdict:  GitHub + Copilot is the clear winner for DEP.          │
+│   Verdict:  GitHub + Copilot is the clear winner for your organization.          │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!IMPORTANT]
-> **Cursor is a great tool — but it's designed for VS Code users, not Visual Studio users.** Since DEP's entire workflow is built around Visual Studio C++ (MSBuild, `.sln` projects, MSVC debugger), Copilot is the only AI assistant that integrates directly into that environment without requiring a tool change.
+> **Cursor is a great tool — but it's designed for VS Code users, not Visual Studio users.** Since the organization's entire workflow is built around Visual Studio C++ (MSBuild, `.sln` projects, MSVC debugger), Copilot is the only AI assistant that integrates directly into that environment without requiring a tool change.
 
 > 📐 **Interactive Diagram:** Open [04-copilot-vs-cursor.excalidraw](diagrams/04-copilot-vs-cursor.excalidraw) in Excalidraw for the full visual comparison.
 
@@ -734,9 +734,9 @@ GitHub Copilot gives developers access to **multiple AI models** directly in the
 ### 9.10 Model Limitations Developers Must Know
 
 > [!WARNING]
-> **No AI model understands CAE physics, FEA algorithms, or Morpher's domain-specific logic.** AI is a coding assistant, not an engineering assistant. The models help with C++ syntax, patterns, and general software engineering — not with finite element math.
+> **No AI model understands CAE physics, FEA algorithms, or the application's domain-specific logic.** AI is a coding assistant, not an engineering assistant. The models help with C++ syntax, patterns, and general software engineering — not with finite element math.
 
-| Limitation | Impact on DEP | Mitigation |
+| Limitation | Impact on the organization | Mitigation |
 |-----------|--------------|-----------|
 | **Context window limits** | C++ headers create deep include chains — model may lose context | Use Gemini (largest context) for header-heavy tasks |
 | **Hallucinated APIs** | Model may suggest Win32/STL functions that don't exist | Always verify suggestions against MSDN docs |
@@ -861,7 +861,7 @@ Admins can **restrict which models** are available to the organization:
 | Allow all models, monitor usage | Dashboard alerts | Flexible but requires oversight |
 | Default to cheapest model | Set GPT-5 mini as default | Developers must actively switch to expensive models |
 
-#### Recommended Configuration for DEP
+#### Recommended Configuration for your organization
 
 ```
 Enterprise Settings → Billing → GitHub Copilot:
@@ -889,7 +889,7 @@ Enterprise Settings → Billing → GitHub Copilot:
 
 ### 10.1 GitHub-Hosted Runner Pricing (Windows)
 
-Since Morpher is a Windows C++ application, you'll primarily use Windows runners:
+Since the application is a Windows C++ application, you'll primarily use Windows runners:
 
 | Runner Size | Per Minute | 30-min Build | 60-min Build | 90-min Build |
 |------------|-----------|-------------|-------------|-------------|
@@ -906,9 +906,9 @@ GitHub Enterprise Cloud includes **50,000 minutes/month** for standard runners.
 > [!IMPORTANT]
 > **Windows minute multiplier:** Windows runners consume minutes at a **2x** rate. So 50,000 included minutes = **25,000 effective Windows minutes** per month.
 
-### 10.3 Monthly Build Cost Estimate for Morpher
+### 10.3 Monthly Build Cost Estimate for the application
 
-Assuming Morpher takes **60 minutes** to build on a Windows 8-core runner:
+Assuming the application takes **60 minutes** to build on a Windows 8-core runner:
 
 | Scenario | Builds/Day | Builds/Month | Minutes/Month | Cost/Month |
 |----------|-----------|-------------|--------------|-----------|
@@ -916,9 +916,9 @@ Assuming Morpher takes **60 minutes** to build on a Windows 8-core runner:
 | **Moderate** (main + PRs) | 10 | 220 | 13,200 | **Included** (within 25K) |
 | **Heavy** (CI on every push) | 25 | 550 | 33,000 | ~$336/mo overage |
 
-### 10.4 Self-Hosted Runners (Recommended for Morpher)
+### 10.4 Self-Hosted Runners (Recommended for the application)
 
-For a large C++ application like Morpher with specific build dependencies (proprietary compilers, SDKs, DLLs), **self-hosted runners** are recommended:
+For a large C++ application like the application with specific build dependencies (proprietary compilers, SDKs, DLLs), **self-hosted runners** are recommended:
 
 | Advantage | Detail |
 |-----------|--------|
@@ -931,7 +931,7 @@ For a large C++ application like Morpher with specific build dependencies (propr
 **Setup:**
 ```yaml
 # .github/workflows/build.yml
-name: Build Morpher
+name: Build the application
 on: [push, pull_request]
 jobs:
   build:
@@ -939,9 +939,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build
-        run: msbuild Morpher.sln /p:Configuration=Release /p:Platform=x64
+        run: msbuild the application.sln /p:Configuration=Release /p:Platform=x64
       - name: Run Tests
-        run: vstest.console.exe bin/Release/MorpherTests.dll
+        run: vstest.console.exe bin/Release/AppTests.dll
 ```
 
 ### 10.5 Build Time Comparison
@@ -1069,17 +1069,17 @@ git push origin --tags
 | **Single mono-repo** | Simple, matches current CVS structure | Large clone size, slower Git operations | ✅ Start here |
 | **Multi-repo** | Smaller repos, independent versioning | Complex dependency management | Consider later |
 
-For Morpher, start with a **single repository** that mirrors the current CVS structure. Optimize later if needed.
+For the application, start with a **single repository** that mirrors the current CVS structure. Optimize later if needed.
 
 ### 11.5 Phase 3: Validation & Training (Weeks 7–9)
 
 | Task | Details |
 |------|---------|
 | **Verify history** | Compare file counts, commit history, branch/tag structure between CVS and Git |
-| **Set up CI/CD** | Configure GitHub Actions for building Morpher |
+| **Set up CI/CD** | Configure GitHub Actions for building the application |
 | **Developer training** | Git basics, branching, pull requests (2–3 half-day sessions) |
 | **Pilot team** | 5–8 developers work in GitHub for 1–2 weeks alongside CVS |
-| **Document workflows** | Create internal wiki for Git workflows specific to DEP |
+| **Document workflows** | Create internal wiki for Git workflows specific to the organization |
 
 ### 11.6 Phase 4: Cutover (Week 10)
 
@@ -1096,11 +1096,11 @@ For Morpher, start with a **single repository** that mirrors the current CVS str
 
 ### 12.1 The DLL Challenge
 
-After 20+ years, Morpher likely has:
+After 20+ years, the application likely has:
 
 | Binary Type | Example | Challenge |
 |------------|---------|-----------|
-| **In-house DLLs** | `MorpherCore.dll`, `FEASolver.dll` | Source code should be in Git, binaries should not |
+| **In-house DLLs** | `AppCore.dll`, `FEASolver.dll` | Source code should be in Git, binaries should not |
 | **Third-party DLLs** | `Intel MKL`, `CUDA`, `Boost` | Should be managed by package manager, not version control |
 | **Legacy DLLs** | Old vendor libraries, no source | Must be preserved but tracked with LFS |
 | **Debug symbols** | `.pdb` files | Large — use LFS or build artifacts |
@@ -1196,10 +1196,10 @@ After 20+ years, Morpher likely has:
 | **Dependencies** | All open source | Mix of open source + commercial | Proprietary vendor libs |
 | **Build system** | Simple MSBuild | Multi-project solution | Custom build scripts |
 | **Team size** | < 10 developers | 10–50 developers | 50+ developers |
-| **CVS history** | < 5 years | 5–15 years | 20+ years ← **DEP is here** |
+| **CVS history** | < 5 years | 5–15 years | 20+ years ← **the organization is here** |
 
 > [!WARNING]
-> **DEP's migration is on the "High" end** due to 20+ years of history, likely many binary files in CVS, and a large team. Plan for **8–10 weeks** with a dedicated migration engineer.
+> **the organization's migration is on the "High" end** due to 20+ years of history, likely many binary files in CVS, and a large team. Plan for **8–10 weeks** with a dedicated migration engineer.
 
 ---
 
@@ -1220,11 +1220,11 @@ After 20+ years, Morpher likely has:
 
 > 📐 **Interactive Diagram:** Open [03-build-pipeline.excalidraw](diagrams/03-build-pipeline.excalidraw) in Excalidraw for the visual CI/CD pipeline flow.
 
-### Example Build Workflow for Morpher
+### Example Build Workflow for the application
 
 ```yaml
 # .github/workflows/build-morpher.yml
-name: Build Morpher
+name: Build the application
 
 on:
   push:
@@ -1234,7 +1234,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted       # Uses DEP's Windows build server
+    runs-on: self-hosted       # Uses the organization's Windows build server
     
     strategy:
       matrix:
@@ -1251,11 +1251,11 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore NuGet packages
-        run: nuget restore Morpher.sln
+        run: nuget restore the application.sln
 
       - name: Build
         run: |
-          msbuild Morpher.sln \
+          msbuild the application.sln \
             /p:Configuration=${{ matrix.configuration }} \
             /p:Platform=${{ matrix.platform }} \
             /m                 # Parallel build
@@ -1263,7 +1263,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           vstest.console.exe \
-            bin/${{ matrix.configuration }}/MorpherTests.dll \
+            bin/${{ matrix.configuration }}/AppTests.dll \
             --logger:trx
 
       - name: Upload Build Artifacts
@@ -1333,14 +1333,14 @@ Branch name pattern: main
   ☑ Require review from Code Owners
 ☑ Require status checks to pass before merging
   ☑ Require branches to be up to date before merging
-  Status checks: "Build Morpher", "Run Tests"
+  Status checks: "Build the application", "Run Tests"
 ☑ Require conversation resolution before merging
 ☑ Do not allow bypassing the above settings
 ```
 
 ### 14.3 CODEOWNERS File
 
-The `CODEOWNERS` file defines **who must review changes** to specific parts of the codebase. This is critical for Morpher where different engineers own different modules.
+The `CODEOWNERS` file defines **who must review changes** to specific parts of the codebase. This is critical for the application where different engineers own different modules.
 
 ```bash
 # .github/CODEOWNERS
@@ -1397,10 +1397,10 @@ This is the **custom rules file** that tells GitHub Copilot how to review your c
 ```markdown
 <!-- .github/copilot-instructions.md -->
 
-# Morpher C++ Code Review Instructions
+# Application C++ Code Review Instructions
 
 ## Project Context
-Morpher is a Computer-Aided Engineering (CAE) desktop application built with
+the application is a Computer-Aided Engineering (CAE) desktop application built with
 Visual C++. It performs finite element analysis, mesh generation, and design
 optimization for automotive and aerospace applications.
 
@@ -1421,10 +1421,10 @@ optimization for automotive and aerospace applications.
 - Log all caught exceptions with severity level.
 
 ### Threading & Concurrency
-- Morpher uses OpenMP for parallel solver loops.
+- the application uses OpenMP for parallel solver loops.
 - Flag any shared variable access in parallel regions without proper
   synchronization (`#pragma omp critical`, atomics, or mutexes).
-- Never use `std::thread` directly — use the Morpher ThreadPool class.
+- Never use `std::thread` directly — use the application ThreadPool class.
 
 ### Performance
 - Flag `std::vector::push_back()` in tight loops without prior `reserve()`.
@@ -1461,7 +1461,7 @@ optimization for automotive and aerospace applications.
 ```
 
 > [!TIP]
-> **This file makes Copilot act like a senior DEP engineer.** Instead of generic suggestions, Copilot will enforce your specific coding standards — checking for Morpher's naming conventions, memory management rules, threading patterns, and performance guidelines in every PR review.
+> **This file makes Copilot act like a senior the organization engineer.** Instead of generic suggestions, Copilot will enforce your specific coding standards — checking for the application's naming conventions, memory management rules, threading patterns, and performance guidelines in every PR review.
 
 ### 14.5 Pull Request Template
 
@@ -1485,7 +1485,7 @@ A PR template ensures developers provide consistent, useful information with eve
 - [ ] 🧪 Test update
 
 ## Modules Affected
-<!-- Which Morpher modules does this change touch? -->
+<!-- Which the application modules does this change touch? -->
 - [ ] Solver Engine
 - [ ] Mesh Generation
 - [ ] UI / Dialogs
@@ -1502,7 +1502,7 @@ A PR template ensures developers provide consistent, useful information with eve
 - [ ] Tested with sample CAE models
 
 ## Checklist
-- [ ] My code follows the Morpher coding standards
+- [ ] My code follows the application coding standards
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly complex areas
 - [ ] I have updated the documentation (if applicable)
@@ -1524,7 +1524,7 @@ A PR template ensures developers provide consistent, useful information with eve
 Prevent build artifacts, debug files, and IDE settings from polluting the repository.
 
 ```gitignore
-# .gitignore — Visual C++ / Morpher
+# .gitignore — Visual C++ / the application
 
 # ── Build outputs ─────────────────────────────────
 [Dd]ebug/
@@ -1581,11 +1581,11 @@ Desktop.ini
 
 ### 14.7 Merge Strategy & Workflow
 
-DEP should adopt **GitHub Flow** (simplified) for Morpher:
+the organization should adopt **GitHub Flow** (simplified) for the Application:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      GitHub Flow for Morpher                    │
+│                      GitHub Flow for the application                    │
 │                                                                 │
 │  main ──────●────────●────────●────────●────── (always stable)  │
 │              \      /          \      /                          │
@@ -1607,7 +1607,7 @@ DEP should adopt **GitHub Flow** (simplified) for Morpher:
 
 #### Merge Method Recommendation
 
-| Method | When to Use | Recommended for DEP? |
+| Method | When to Use | Recommended for your organization? |
 |--------|------------|---------------------|
 | **Squash and merge** | Combines all commits into one clean commit | ✅ **Yes — default** |
 | **Merge commit** | Preserves full branch history | For large features |
@@ -1622,7 +1622,7 @@ Configure these checks to run on every PR. The PR cannot be merged until all pas
 
 | Status Check | What It Does | Tool |
 |-------------|-------------|------|
-| **Build Morpher** | Compiles the full solution | GitHub Actions (self-hosted) |
+| **Build the application** | Compiles the full solution | GitHub Actions (self-hosted) |
 | **Run Unit Tests** | Executes test suite | GitHub Actions |
 | **Copilot Review** | AI code review | GitHub Copilot |
 | **Code Formatting** | Checks style compliance | clang-format |
@@ -1641,14 +1641,14 @@ on:
 
 jobs:
   build:
-    name: Build Morpher
+    name: Build the application
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
       - name: Build (Release x64)
-        run: msbuild Morpher.sln /p:Configuration=Release /p:Platform=x64 /m
+        run: msbuild the application.sln /p:Configuration=Release /p:Platform=x64 /m
 
   test:
     name: Run Unit Tests
@@ -1657,7 +1657,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Tests
-        run: vstest.console.exe bin/Release/MorpherTests.dll --logger:trx
+        run: vstest.console.exe bin/Release/AppTests.dll --logger:trx
       - name: Publish Results
         uses: dorny/test-reporter@v1
         if: always()
@@ -1689,7 +1689,7 @@ jobs:
 
 ### 14.9 Complete Repository Structure After Setup
 
-Here's what Morpher's GitHub repository should look like after applying all governance files:
+Here's what the application's GitHub repository should look like after applying all governance files:
 
 ```
 morpher/
@@ -1705,7 +1705,7 @@ morpher/
 ├── .clang-format                  ← Code formatting rules
 ├── .clang-tidy                    ← Static analysis config
 ├── CMakeLists.txt                 ← Build configuration
-├── Morpher.sln                    ← Visual Studio solution
+├── the application.sln                    ← Visual Studio solution
 ├── README.md                      ← Project overview
 ├── docs/                          ← Documentation
 ├── src/                           ← Source code
@@ -1805,7 +1805,7 @@ morpher/
 
 | Factor | Verdict |
 |--------|--------|
-| Doesn't run inside Visual Studio | ❌ Dealbreaker for DEP |
+| Doesn't run inside Visual Studio | ❌ Dealbreaker for your organization |
 | 2x the cost of Copilot Business | ❌ $12,600–$18,900/yr more |
 | Still requires GitHub for version control | ❌ Adds cost, not replaces |
 | Great AI features | ✅ But same capabilities available in Copilot inside VS |
@@ -1814,7 +1814,7 @@ morpher/
 ### Final Recommendation
 
 > [!IMPORTANT]
-> **Migrate to GitHub Enterprise Cloud with Copilot Business.** Start with a 10-week phased migration, use self-hosted runners for CI/CD, and enable Copilot for all developers. The investment of **$1.32 per developer per day** ($480/developer/year) delivers modern version control, AI-assisted development, automated CI/CD, and positions DEP's engineering team for the next 20 years.
+> **Migrate to GitHub Enterprise Cloud with Copilot Business.** Start with a 10-week phased migration, use self-hosted runners for CI/CD, and enable Copilot for all developers. The investment of **$1.32 per developer per day** ($480/developer/year) delivers modern version control, AI-assisted development, automated CI/CD, and positions the organization's engineering team for the next 20 years.
 >
 > **Skip Cursor AI** — it cannot integrate with Visual Studio and costs 50% more while still requiring GitHub underneath.
 
