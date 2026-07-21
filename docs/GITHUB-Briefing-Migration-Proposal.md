@@ -1,7 +1,6 @@
 # Modernizing Morpher's Development Infrastructure
 ## A Proposal for Detroit Engineered Products
 
-> **Prepared for:** CEO, Detroit Engineered Products  
 > **Date:** July 2026  
 > **Read time:** 10 minutes  
 > **Classification:** Internal — Confidential
