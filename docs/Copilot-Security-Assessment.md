@@ -231,7 +231,400 @@ With these security configurations:
 
 ---
 
-## 7. The Trade-Off — Security vs Coding Effectiveness
+## 7. Security Controls to Introduce — Complete Checklist
+
+> **Current state:** The company does not have existing access controls or security mechanisms for AI-assisted development. This section covers EVERYTHING that needs to be introduced before and during the Copilot Enterprise rollout.
+
+### 7.1 SAML/SSO — Single Sign-On Authentication
+
+**What it is:** Developers log into GitHub using the company's identity provider (Azure AD, Okta, Google Workspace, etc.) instead of individual GitHub passwords.
+
+**Why you need it:**
+- ✅ Centralized user management — add/remove developers in one place
+- ✅ Enforce password policies, MFA, and session timeouts
+- ✅ Automatic de-provisioning when employees leave
+- ✅ Prevent unauthorized access to repos and Copilot
+
+**How to set it up:**
+
+```
+1. Choose an Identity Provider (IdP):
+   - Azure Active Directory (if Microsoft shop)
+   - Okta
+   - Google Workspace
+   - OneLogin
+   - PingIdentity
+
+2. Configure SAML in GitHub Enterprise:
+   GitHub Org → Settings → Authentication security → SAML single sign-on
+   
+   Required fields:
+   - Sign on URL:        https://your-idp.com/saml/sso
+   - Issuer:             https://your-idp.com/issuer
+   - Public Certificate: [Upload from IdP]
+
+3. Enforce SAML:
+   Toggle "Require SAML SSO authentication for all members"
+   → Every developer MUST authenticate via your IdP
+   → No direct GitHub password login allowed
+
+4. Test:
+   - Have 2-3 developers log in via SSO
+   - Verify they can access repos and Copilot
+   - Verify they CANNOT log in with just GitHub credentials
+```
+
+**Effort:** 2-3 days (IT Security team)
+
+---
+
+### 7.2 Two-Factor Authentication (2FA)
+
+**What it is:** Every developer must use a second authentication factor (phone app, hardware key) in addition to their password.
+
+**Why you need it:**
+- ✅ Prevents account takeover even if password is compromised
+- ✅ Required for most compliance frameworks
+- ✅ Can be enforced at the organization level
+
+**How to set it up:**
+
+```
+GitHub Org → Settings → Authentication security
+→ Toggle: "Require two-factor authentication for everyone"
+
+Supported 2FA methods:
+  - Authenticator app (Google Authenticator, Microsoft Authenticator)
+  - Hardware security key (YubiKey)
+  - GitHub Mobile app
+  - SMS (not recommended — vulnerable to SIM swapping)
+
+Timeline: Org members have 1 month to enable 2FA after enforcement.
+          Members who don't comply are automatically REMOVED from the org.
+```
+
+**Effort:** 1 day (Admin) + developer compliance time
+
+---
+
+### 7.3 Enterprise Managed Users (EMU)
+
+**What it is:** GitHub accounts are created and managed by YOUR organization's identity provider. Developers do NOT use personal GitHub accounts.
+
+**Why you need it:**
+- ✅ Developers cannot fork company repos to personal accounts
+- ✅ Developers cannot copy/clone code outside company control
+- ✅ Accounts are automatically deleted when employees leave
+- ✅ Company owns all data — no personal repos on managed accounts
+- ✅ All Copilot usage tied to managed identity
+
+**How it compares:**
+
+| | Standard GitHub | Enterprise Managed Users (EMU) |
+|---|---|---|
+| Account owned by | Developer (personal) | Company (managed) |
+| Can fork to personal? | ⚠️ Yes | ❌ No |
+| Can access external repos? | ⚠️ Yes | ❌ No (only org repos) |
+| Auto de-provisioned? | ❌ Manual removal | ✅ Automatic via IdP |
+| Copilot usage tracked? | ✅ Yes | ✅ Yes (tighter control) |
+
+**Effort:** 3-5 days (requires IdP integration + SCIM provisioning)
+
+> ⚠️ **Trade-off:** EMU accounts cannot contribute to open-source projects or access public repos. If developers need both work and personal GitHub usage, standard accounts + SAML may be preferable.
+
+---
+
+### 7.4 Audit Logging — Comprehensive Activity Trails
+
+**What it is:** Every action in your GitHub org is logged — who did what, when, from where.
+
+**Why you need it:**
+- ✅ Compliance-ready audit trail
+- ✅ Track who accessed what repos
+- ✅ Monitor Copilot usage (which developers, how much, what models)
+- ✅ Detect suspicious activity (bulk clones, unauthorized access)
+- ✅ CISO visibility into AI tool usage
+
+**What gets logged:**
+
+```
+GITHUB AUDIT LOG CAPTURES:
+
+  Repository events:
+    ✅ repo.create, repo.delete, repo.clone
+    ✅ repo.access (who viewed/cloned which repo)
+    ✅ protected_branch.policy_override
+
+  User events:
+    ✅ user.login, user.logout, user.failed_login
+    ✅ user.add_member, user.remove_member
+    ✅ user.2fa_disabled (security alert!)
+
+  Copilot events:
+    ✅ copilot.seat_assigned, copilot.seat_removed
+    ✅ copilot.cfr_request (code referencing detected)
+    ✅ copilot.content_exclusion_change
+    ✅ copilot.policy_update
+
+  Organization events:
+    ✅ org.saml_sign_on, org.member_added
+    ✅ org.billing_update, org.team_create
+```
+
+**How to access:**
+
+```
+1. GitHub UI:
+   Org → Settings → Audit log
+   → Filter by date, event type, actor, repository
+
+2. API (for SIEM integration):
+   GET /orgs/{org}/audit-log?phrase=action:copilot
+   → Export to Splunk, Datadog, or your SIEM
+
+3. Log streaming (Enterprise):
+   Stream audit logs in real-time to:
+   - Amazon S3
+   - Azure Blob Storage
+   - Google Cloud Storage
+   - Datadog
+   - Splunk
+```
+
+**Effort:** 1-2 days (Admin + Security team)
+
+---
+
+### 7.5 IP Protection — Ensuring Code Is Never Used for Training
+
+**What it is:** Contractual and technical guarantees that your source code is not used to train AI models.
+
+**What GitHub Enterprise provides:**
+
+```
+CONTRACTUAL PROTECTIONS:
+  ✅ GitHub Enterprise Terms of Service explicitly state:
+     "We do not use your Content to train AI models"
+     
+  ✅ Data Processing Agreement (DPA) available:
+     → Defines GitHub as "Data Processor"
+     → Your org is "Data Controller"
+     → GitHub can ONLY process data to provide the service
+     
+  ✅ IP Indemnification:
+     → If Copilot suggests code that infringes on copyright,
+        Microsoft provides legal defense and indemnification
+     → Available on Enterprise plan only
+```
+
+**Technical protections:**
+
+| Protection | How It Works |
+|---|---|
+| Zero data retention | Code snippets discarded immediately after AI response |
+| No model training | Enterprise data excluded from all training pipelines |
+| Encrypted in transit | TLS 1.2+ for all API calls |
+| Encrypted at rest | AES-256 for all stored data |
+| Code referencing filter | Copilot flags suggestions that match public code — prevents copyright issues |
+| Content exclusion | Admin blocks specific directories from AI context entirely |
+
+**What to request from GitHub:**
+1. ✅ Signed Data Processing Agreement (DPA)
+2. ✅ IP Indemnification confirmation (Enterprise plan)
+3. ✅ Written confirmation: no training on enterprise data
+4. ✅ SOC 2 Type 2 audit report (request via GitHub Trust Center)
+5. ✅ ISO 27001 certification confirmation
+
+**Effort:** 1-2 weeks (Legal team review of DPA + terms)
+
+---
+
+### 7.6 Content Exclusion Policies — Blocking Sensitive Code
+
+**What it is:** Admin-level control to exclude specific files, directories, or repositories from Copilot's AI context. When excluded, Copilot is completely DISABLED for those files.
+
+**Why you need it:**
+- ✅ Proprietary solver algorithms never sent to AI
+- ✅ Trade secret code stays local — zero cloud exposure
+- ✅ Flexible per-directory control
+
+**How to configure:**
+
+```
+GitHub Org → Settings → Copilot → Content exclusion
+
+Add exclusion rules:
+
+  Repository-level:
+    repo: "morpher-solver"
+    paths: 
+      - "src/solver/core/**"
+      - "src/proprietary/**"
+      - "src/patents/**"
+
+  Organization-wide:
+    paths:
+      - "**/*.key"
+      - "**/*.pem"
+      - "**/*.env"
+      - "**/secrets/**"
+      - "**/credentials/**"
+
+  Entire repositories:
+    repos:
+      - "morpher-solver-proprietary"
+      - "internal-patents"
+```
+
+**What happens when a developer opens an excluded file:**
+
+```
+Developer opens: src/solver/core/StiffnessMatrix.cpp
+  → Copilot inline completions: DISABLED ❌
+  → Copilot Chat about this file: DISABLED ❌
+  → Code from this file sent to AI: NEVER ❌
+  → Developer sees: "Content excluded by organization policy"
+
+Developer opens: src/ui/MainWindow.cpp (not excluded)
+  → Copilot works normally ✅
+```
+
+**Effort:** 1 day (Admin + Tech Lead to define exclusion list)
+
+---
+
+### 7.7 Organization-Wide Copilot Policies
+
+**What it is:** Admin sets policies that apply to ALL developers — no individual overrides allowed.
+
+**Configurable policies:**
+
+| Policy | Options | Recommendation |
+|---|---|---|
+| **Copilot in IDE** | Enable / Disable / Opt-in | Enable for all |
+| **Copilot Chat** | Enable / Disable | Enable for all |
+| **Copilot CLI** | Enable / Disable | Disable (unless needed) |
+| **Copilot in GitHub.com** | Enable / Disable | Enable |
+| **Code referencing** (public code filter) | Block / Allow | **Block** — prevents copyright issues |
+| **Model selection** | Allow all / Restrict | Restrict to approved models |
+| **Copilot Agents** | Enable / Disable | Enable with caution |
+
+**How to configure:**
+
+```
+GitHub Org → Settings → Copilot → Policies
+
+Recommended settings for a security-first org:
+  ✅ Enable Copilot for: "All members" (or specific teams)
+  ✅ Suggestions matching public code: "Block"
+  ✅ Allow Copilot to access Bing: "Disabled"
+  ✅ Editor preview features: "Disabled" (stability first)
+```
+
+**Effort:** 1 hour (Admin)
+
+---
+
+### 7.8 Network & Firewall Controls
+
+**What it is:** Ensuring developer machines can reach GitHub's Copilot endpoints while blocking unauthorized AI tools.
+
+**Required network access (whitelist):**
+
+```
+ALLOW these domains through corporate firewall:
+
+  GitHub Core:
+    ✅ github.com
+    ✅ api.github.com
+    ✅ *.githubusercontent.com
+
+  Copilot Specific:
+    ✅ copilot.github.com
+    ✅ copilot-proxy.githubusercontent.com
+    ✅ copilot.microsoft.com
+    ✅ *.individual.githubcopilot.com
+
+  Authentication:
+    ✅ github.com/login/oauth
+    ✅ Your SAML/SSO IdP endpoints
+
+BLOCK these to prevent shadow AI usage:
+
+  ❌ api.anthropic.com (Claude Code)
+  ❌ api.openai.com (direct ChatGPT usage)
+  ❌ cursor.sh (Cursor IDE)
+  ❌ windsurf.com (Windsurf/Devin)
+  ❌ Any other unauthorized AI endpoints
+```
+
+**Effort:** 1-2 days (Network / Firewall team)
+
+---
+
+### 7.9 Developer Usage Policies
+
+**What it is:** Written policies for developers on how to use AI coding tools responsibly.
+
+**Policy document should cover:**
+
+```
+DEVELOPER AI USAGE POLICY
+
+1. AUTHORIZED TOOLS:
+   ✅ GitHub Copilot Enterprise (via Visual Studio 2022)
+   ❌ Personal AI tools (ChatGPT, Claude, Cursor, etc.) are PROHIBITED
+      on company machines for coding tasks
+
+2. CODE HANDLING:
+   ✅ Never copy proprietary code into external AI tools
+   ✅ Never paste company code into ChatGPT, Claude web, or similar
+   ✅ Use Copilot ONLY within the IDE — not via browser-based tools
+   ✅ Report any Copilot suggestion that looks like it came from
+      public/copyrighted code
+
+3. EXCLUDED DIRECTORIES:
+   ✅ Understand that Copilot is DISABLED in excluded paths
+   ✅ Do NOT attempt to bypass content exclusion policies
+   ✅ Contact [Admin/Tech Lead] to request changes to exclusion list
+
+4. REVIEW REQUIREMENTS:
+   ✅ ALWAYS review Copilot suggestions before accepting
+   ✅ NEVER blindly accept multi-line suggestions in solver code
+   ✅ Copilot does NOT understand physics — verify all math/algorithms
+   ✅ All Copilot-assisted PRs require the same human review as manual PRs
+
+5. SECURITY:
+   ✅ Use 2FA on your GitHub account
+   ✅ Do not share GitHub credentials
+   ✅ Report any suspicious Copilot behavior to IT Security
+```
+
+**Effort:** 1 day (Tech Lead + Security team to draft, Management to approve)
+
+---
+
+### 7.10 Complete Security Implementation Checklist
+
+| # | Security Control | Priority | Owner | Effort | Status |
+|---|---|---|---|---|---|
+| 1 | **SAML/SSO** — Connect identity provider | 🔴 Critical | IT Security | 2-3 days | ☐ |
+| 2 | **2FA enforcement** — All org members | 🔴 Critical | Admin | 1 day | ☐ |
+| 3 | **Content exclusion** — Block proprietary code directories | 🔴 Critical | Admin + Tech Lead | 1 day | ☐ |
+| 4 | **Organization Copilot policies** — Block public code matches | 🔴 Critical | Admin | 1 hour | ☐ |
+| 5 | **IP protection** — Sign DPA with GitHub | 🔴 Critical | Legal | 1-2 weeks | ☐ |
+| 6 | **Audit logging** — Enable and configure | 🟡 High | Admin + Security | 1-2 days | ☐ |
+| 7 | **Network controls** — Whitelist GitHub, block shadow AI | 🟡 High | Network team | 1-2 days | ☐ |
+| 8 | **Developer usage policy** — Draft and distribute | 🟡 High | Tech Lead + Mgmt | 1 day | ☐ |
+| 9 | **Enterprise Managed Users** (optional) | 🟢 Medium | IT + Admin | 3-5 days | ☐ |
+| 10 | **Audit log streaming** to SIEM (optional) | 🟢 Medium | Security | 2-3 days | ☐ |
+| 11 | **Developer training** — Security awareness | 🟢 Medium | Consultant/Lead | 1 day | ☐ |
+
+> **Total implementation time for all security controls: ~2-3 weeks** (can run in parallel with Phase 1 of the migration plan)
+
+---
+
+## 8. The Trade-Off — Security vs Coding Effectiveness
 
 > Copilot wins on security. But how much coding capability are you giving up by not using Claude Code?
 
