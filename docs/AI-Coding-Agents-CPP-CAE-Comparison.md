@@ -19,6 +19,7 @@
 7. [Benefits & Drawbacks Summary](#7-benefits--drawbacks-summary)
 8. [Recommendation for the Organization](#8-recommendation-for-the-organization)
 9. [Security, Privacy & Data Training — Will They Learn Your Code?](#9-security-privacy--data-training--will-they-learn-your-code)
+10. [GitHub Enterprise — Cloud vs Server](#10-github-enterprise--cloud-vs-server)
 
 ---
 
@@ -454,6 +455,94 @@ For organizations with the strictest security requirements, both Copilot and Cla
 | **Copilot via Azure** | Already runs through Azure. Microsoft's enterprise compliance applies. | SOC 2, ISO 27001, FedRAMP out of the box. |
 
 > **For your organization's CAE code:** If the CISO requires that proprietary solver code never leaves the corporate cloud, deploying Claude via **AWS Bedrock** or **Vertex AI** eliminates the data sharing concern entirely. The model runs in your environment — Anthropic never sees the code.
+
+---
+
+## 10. GitHub Enterprise — Cloud vs Server
+
+If your organization decides to adopt GitHub, you'll need to choose between **Enterprise Cloud** and **Enterprise Server**. This is a fundamental infrastructure decision.
+
+### What's the Difference?
+
+| | **Enterprise Cloud** | **Enterprise Server** |
+|---|---|---|
+| **Where it runs** | GitHub.com (hosted by GitHub/Microsoft) | **Your own servers** (on-prem or your private cloud) |
+| **URL** | `github.com/your-org` | `github.yourcompany.com` |
+| **Maintenance** | GitHub handles updates, backups, uptime | **Your team** manages updates, backups, infrastructure |
+| **Price** | **$21/user/month** | **$21/user/month** (same license cost, but add your infra + ops cost) |
+| **Copilot support** | ✅ Full — all features | ⚠️ Limited — Copilot still calls GitHub's cloud APIs |
+| **GitHub Actions** | ✅ GitHub-hosted runners available | ⚠️ Self-hosted runners only (you provide compute) |
+| **Uptime SLA** | 99.9% (GitHub-managed) | Depends on your infrastructure team |
+| **Data residency** | GitHub's data centers (US, EU options available) | **Your data center** — full control over location |
+| **Setup time** | Minutes (create org, add users) | Days to weeks (provision servers, configure, test) |
+| **SAML/SSO** | ✅ Yes | ✅ Yes |
+| **Audit logging** | ✅ Yes (API + UI) | ✅ Yes (local logs) |
+| **Network isolation** | ⚠️ Shared infrastructure (logically isolated per org) | ✅ **Full network isolation** — runs behind your firewall |
+| **Feature releases** | ✅ Latest features immediately | ⚠️ Features lag behind Cloud by 3-6 months |
+| **Disaster recovery** | GitHub handles it | **Your responsibility** — backups, failover, etc. |
+
+### When to Choose Cloud vs Server
+
+```
+Choose ENTERPRISE CLOUD if:
+  ✅ You want zero infrastructure management
+  ✅ Code on GitHub's servers is acceptable (encrypted at rest + in transit)
+  ✅ You want the latest features and Copilot capabilities immediately
+  ✅ You want GitHub-hosted Actions runners (no self-managed compute)
+  ✅ Your team doesn't have dedicated DevOps for GitHub infra
+  → 90% of organizations choose this option
+
+Choose ENTERPRISE SERVER if:
+  ✅ Regulatory requirement mandates code CANNOT leave your network
+  ✅ Air-gapped environment (no internet access)
+  ✅ CISO mandate: all source code must stay on-premise
+  ✅ You have a dedicated infra/platform team to manage it
+  ⚠️ You accept that features arrive 3-6 months later
+  ⚠️ You accept the operational burden of managing GitHub infrastructure
+```
+
+### The Copilot Catch with Enterprise Server
+
+> ⚠️ **Important:** Even with Enterprise Server (on-prem), **Copilot still sends code snippets to GitHub's cloud** for AI processing. There is no fully on-prem Copilot deployment. 
+
+This means:
+
+| Scenario | Enterprise Cloud | Enterprise Server |
+|---|---|---|
+| Code hosted where? | GitHub.com (cloud) | Your servers (on-prem) |
+| Copilot completions processed where? | GitHub's cloud ✅ | **Still GitHub's cloud** ⚠️ |
+| Code snippets leave your network? | Yes (by design) | **Yes (for Copilot only)** ⚠️ |
+
+If your CISO's concern is specifically about code leaving the network, Enterprise Server **does not solve the Copilot problem**. For that scenario, you'd need:
+- **Option A:** Use Enterprise Server WITHOUT Copilot (lose AI benefits)
+- **Option B:** Use Enterprise Cloud WITH Copilot Business/Enterprise (accept cloud processing with enterprise data protections)
+- **Option C:** Use Enterprise Server + Claude Code via AWS Bedrock/Vertex AI (code processed in YOUR cloud, not GitHub's)
+
+### Cost Comparison — 50 Developers
+
+| | Enterprise Cloud | Enterprise Server |
+|---|---|---|
+| GitHub license | $21 × 50 = **$1,050/mo** | $21 × 50 = **$1,050/mo** |
+| Infrastructure | $0 (included) | ~$500-2,000/mo (servers, storage, backups) |
+| Ops team time | $0 (GitHub-managed) | ~$2,000-5,000/mo (partial FTE for maintenance) |
+| Copilot Business | $19 × 50 = $950/mo | $19 × 50 = $950/mo |
+| **Total monthly** | **~$2,000** | **~$4,500-9,000** |
+| **Total annual** | **~$24,000** | **~$54,000-108,000** |
+
+> Enterprise Server costs **2-4x more** than Cloud when you factor in infrastructure and operations. The license is the same — the difference is everything you have to manage yourself.
+
+### Recommendation
+
+For an organization running workloads on Google Distributed Cloud (GDC) — meaning you're already a cloud-native shop — **Enterprise Cloud is the right choice**:
+
+1. ✅ No infrastructure to manage
+2. ✅ Full Copilot support with latest features
+3. ✅ GitHub Actions with hosted runners
+4. ✅ Lower total cost of ownership
+5. ✅ Enterprise data protections (no training, audit logs, SSO)
+6. ✅ Your code is already in cloud environments (GDC) — GitHub Cloud is consistent with that model
+
+Enterprise Server only makes sense for **air-gapped or heavily regulated environments** where code physically cannot leave the corporate network — and even then, Copilot won't work fully on-prem.
 
 ---
 
