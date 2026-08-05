@@ -18,6 +18,7 @@
 6. [CAE-Specific C++ Effectiveness](#6-cae-specific-c-effectiveness)
 7. [Benefits & Drawbacks Summary](#7-benefits--drawbacks-summary)
 8. [Recommendation for the Organization](#8-recommendation-for-the-organization)
+9. [Security, Privacy & Data Training — Will They Learn Your Code?](#9-security-privacy--data-training--will-they-learn-your-code)
 
 ---
 
@@ -310,6 +311,149 @@ For a team that:
 | Best ROI for complex C++ work | Copilot + Claude Code for leads ($348/dev/year avg) |
 | Maximum AI capability regardless of cost | Copilot + Claude Code + Cursor trial ($377/dev/year avg) |
 | Enterprise compliance & IP protection | Copilot Enterprise ($468/dev/year) |
+
+---
+
+## 9. Security, Privacy & Data Training — Will They Learn Your Code?
+
+> **This is the #1 concern for enterprise CAE code.** Your C++ solver algorithms, mesh generation logic, and proprietary FEA implementations are trade secrets. Here's the honest breakdown.
+
+### The Big Question: Does My Code Get Used for Training?
+
+| Plan Type | Copilot | Claude Code | Cursor | Windsurf |
+|---|---|---|---|---|
+| **Enterprise/Business** | ❌ **No training** | ❌ **No training** | ❌ **No training** | ❌ **No training** |
+| **Individual Pro/Free** | ⚠️ **Yes by default** (opt-out available) | ⚠️ **Yes if opted in** | ⚠️ **Depends on model provider** | ⚠️ **Depends on model provider** |
+
+> **Critical rule: ALL developer seats MUST be on Enterprise/Business/Team plans.** Individual/Pro accounts on corporate machines = your proprietary C++ code potentially enters training pipelines.
+
+### Data Privacy Comparison — Enterprise Plans
+
+| Security Aspect | GitHub Copilot Enterprise | Claude Code (Enterprise/API) | Cursor Teams | Windsurf Teams |
+|---|---|---|---|---|
+| **Code used for training?** | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Code stored at rest?** | Transient only (discarded after response) | 30-day retention, then deleted. ZDR available | Transient | Transient |
+| **IP Indemnification** | ✅ Yes (legal protection against copyright claims) | ⚠️ Via commercial terms only | ⚠️ Via commercial terms | ❌ Not established |
+| **SOC 2 Type 2** | ✅ Yes | ✅ Yes | ✅ Yes | ⚠️ Not confirmed |
+| **ISO 27001** | ✅ Yes | ✅ Yes | ❌ Not confirmed | ❌ Not confirmed |
+| **Admin audit logs** | ✅ Yes | ⚠️ Requires AI gateway | ✅ Yes (Teams) | ✅ Yes (Teams) |
+| **SSO/SAML** | ✅ Enterprise only | ✅ Enterprise only | ✅ Teams | ✅ Enterprise |
+| **Content exclusion** | ✅ Can exclude repos/paths | ⚠️ Developer-managed | ⚠️ Manual via .cursorignore | ⚠️ Manual |
+| **Zero Data Retention (ZDR)** | ✅ Available | ✅ Available (API) | ❌ Not available | ❌ Not available |
+| **Data Processing Agreement (DPA)** | ✅ Yes | ✅ Yes (commercial) | ✅ Yes (Teams/Enterprise) | ⚠️ Contact sales |
+
+### Claude Code — Specific Security Concerns
+
+Claude Code is uniquely different because it's an **autonomous agent with filesystem and shell access**. This introduces risks that IDE-based tools don't have:
+
+#### What Claude Code Can Access
+
+```
+When you run Claude Code in your repo, it can:
+
+  ✅ READ any file in the project directory (and subdirectories)
+     → Your entire C++ codebase is readable
+     → Headers, source files, build configs, scripts
+     
+  ✅ EXECUTE shell commands (with your permission)
+     → msbuild, make, cmake, git, etc.
+     → Could theoretically run ANY command
+     
+  ✅ WRITE/MODIFY files
+     → Can edit source code directly
+     → Can create new files
+     
+  ✅ SEND code to Anthropic's servers for LLM processing
+     → Code is sent as context for the AI to reason about
+     → On Enterprise: NOT used for training
+     → On Pro/Max: MAY be used for training (opt-out available)
+```
+
+#### What Anthropic Does With Your Code (Enterprise/API)
+
+```
+YOUR CODE → sent to Anthropic API → processed by Claude model → response returned
+                    │
+                    ├── NOT stored for training ✅
+                    ├── NOT shared with other customers ✅
+                    ├── NOT accessible to Anthropic employees ✅ (except safety review)
+                    ├── Retained for up to 30 days (abuse prevention) ⚠️
+                    ├── ZDR option: zero retention after response ✅
+                    └── Safety-flagged content: retained up to 2 years ⚠️
+```
+
+#### The "Shadow AI" Risk
+
+> **Biggest real-world risk:** A developer installs Claude Code on their personal laptop, uses their personal Pro ($20/mo) account, and opens the proprietary C++ repo. Their code IS potentially used for training because they're on a consumer plan.
+
+**Mitigation:**
+- Enforce enterprise accounts via IT policy
+- Block personal AI tool installations on corporate machines
+- Use an AI Gateway (middleware) to route all AI requests through sanctioned channels
+- Periodic audits of installed AI tools on developer machines
+
+### Copilot — Security Advantages for Enterprise
+
+GitHub Copilot has the most mature enterprise security story because of Microsoft's enterprise DNA:
+
+| Feature | Why It Matters for CAE Code |
+|---|---|
+| **Content exclusion policies** | Admin can exclude `src/solver/**` from Copilot context — keeps proprietary algorithms out of AI entirely |
+| **IP Indemnification** | If Copilot suggests code that violates someone's copyright, Microsoft provides legal protection |
+| **Audit logs** | CISO can see who used Copilot, how often, what models — compliance-ready |
+| **Organization-wide policies** | Force specific settings across all 50 developers — no individual overrides |
+| **GitHub-native** | Code never leaves the GitHub ecosystem — no third-party data sharing |
+
+### Risk Matrix for CAE C++ Code
+
+| Risk | Copilot Enterprise | Claude Code Enterprise | Claude Code Pro (Individual) |
+|---|---|---|---|
+| Code used for training | ✅ Safe | ✅ Safe | ⚠️ **Risk — opt-out required** |
+| Code stored on vendor servers | ✅ Transient only | ⚠️ Up to 30 days | ⚠️ Up to 30 days |
+| Unauthorized code access | ✅ Low (IDE-only) | ⚠️ Medium (filesystem access) | ⚠️ Medium |
+| Accidental code modification | ✅ Low (suggestions only) | ⚠️ Medium (autonomous edits) | ⚠️ Medium |
+| Compliance audit trail | ✅ Full | ⚠️ Requires AI gateway | ❌ None |
+| IP indemnification | ✅ Yes | ⚠️ Commercial terms | ❌ No |
+
+### Recommendations for Protecting CAE Code
+
+```
+MANDATORY (before any tool deployment):
+  1. ALL seats on Enterprise/Business/Team plans — NEVER individual accounts
+  2. Corporate IT policy prohibiting personal AI tools on work machines
+  3. Legal review of vendor DPA (Data Processing Agreement)
+  4. Define which code directories are AI-accessible vs excluded
+
+FOR COPILOT:
+  5. Enable content exclusion for most sensitive solver/IP code
+  6. Enable audit logging
+  7. Set organization-wide model and feature policies
+
+FOR CLAUDE CODE:
+  8. Use API access (not Pro/Max consumer accounts) for best data controls
+  9. Consider Zero Data Retention (ZDR) option
+  10. Implement .claude/settings.json to restrict file access patterns
+  11. Train developers: always review autonomous changes before committing
+  12. Consider running Claude Code in a sandboxed container/VM
+
+FOR MAXIMUM SECURITY:
+  13. Deploy via AWS Bedrock or Google Cloud Vertex AI
+      → Anthropic never sees your data at all
+      → Code processed within YOUR cloud environment
+      → Full compliance with internal security policies
+```
+
+### The AWS Bedrock / Vertex AI Option
+
+For organizations with the strictest security requirements, both Copilot and Claude models can be deployed through cloud intermediaries:
+
+| Deployment | How It Works | Security Benefit |
+|---|---|---|
+| **Claude via AWS Bedrock** | Claude model runs in YOUR AWS account. Code never reaches Anthropic. | Maximum isolation. Full AWS compliance (FedRAMP, HIPAA, etc.) |
+| **Claude via Google Vertex AI** | Claude model runs in YOUR GCP project. Code never reaches Anthropic. | Maximum isolation. Full GCP compliance. |
+| **Copilot via Azure** | Already runs through Azure. Microsoft's enterprise compliance applies. | SOC 2, ISO 27001, FedRAMP out of the box. |
+
+> **For your organization's CAE code:** If the CISO requires that proprietary solver code never leaves the corporate cloud, deploying Claude via **AWS Bedrock** or **Vertex AI** eliminates the data sharing concern entirely. The model runs in your environment — Anthropic never sees the code.
 
 ---
 
