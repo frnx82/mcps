@@ -562,7 +562,97 @@ BLOCK these to prevent shadow AI usage:
 
 ---
 
-### 7.9 Developer Usage Policies
+### 7.9 IP Allow Lists & Network-Restricted Access
+
+**What it is:** Restrict GitHub access so developers can ONLY authenticate when on the company network or connected via VPN.
+
+**Why you need it:**
+- ✅ Code cannot be accessed from unauthorized networks
+- ✅ Prevents access from personal WiFi, coffee shops, etc.
+- ✅ Ensures all Copilot usage happens from company-controlled environments
+- ✅ Combined with SAML/SSO, creates a multi-layer access gate
+
+**Option A: GitHub IP Allow List (Built-in)**
+
+```
+GitHub Org → Settings → Authentication security → IP allow list
+
+Add your company's IP ranges:
+  ✅ 203.0.113.0/24      (office network)
+  ✅ 198.51.100.0/24      (VPN gateway IP)
+  ✅ 10.200.0.0/16         (secondary office)
+
+Toggle: "Enable IP allow list" → ON
+Toggle: "Enable IP allow list for GitHub Apps" → ON
+
+Result:
+  ✅ Developer on company network → CAN access GitHub + Copilot
+  ✅ Developer on VPN from home → CAN access (VPN IP is allowed)
+  ❌ Developer at home (no VPN) → BLOCKED from GitHub entirely
+  ❌ Developer on personal device/WiFi → BLOCKED
+  ❌ Copilot in Visual Studio → BLOCKED (can't reach GitHub API)
+```
+
+**Option B: Conditional Access via Identity Provider (More Flexible)**
+
+Your IdP (Azure AD, Okta, etc.) can enforce location and device rules BEFORE GitHub authentication:
+
+```
+Azure AD / Okta Conditional Access Policy:
+
+  Rule 1 — Location-based:
+    IF user is accessing: GitHub Enterprise
+    AND location is: NOT company network / NOT VPN
+    THEN: BLOCK access
+
+  Rule 2 — Device-based:
+    IF user is accessing: GitHub Enterprise
+    AND device is: NOT company-managed (not enrolled in MDM)
+    THEN: BLOCK access (even on company WiFi)
+
+  Rule 3 — Extra MFA for remote:
+    IF user is accessing: GitHub Enterprise
+    AND location is: Outside company network
+    AND user role is: Team Lead or Architect
+    THEN: ALLOW but require additional MFA step
+```
+
+**Option C: Both Together (Maximum Security)**
+
+```
+Developer trying to access GitHub:
+
+  Step 1: Is their IP in GitHub's allow list?
+          ❌ No → BLOCKED (never reaches login page)
+          ✅ Yes → Continue
+
+  Step 2: SAML/SSO via IdP — Is device compliant? Is location trusted?
+          ❌ No → BLOCKED by IdP conditional access policy
+          ✅ Yes → Continue
+
+  Step 3: 2FA check
+          ❌ Fails → BLOCKED
+          ✅ Passes → Access granted ✅
+
+  THREE layers must pass. Very secure.
+```
+
+**Which option fits your team?**
+
+| Work Setup | Recommendation |
+|---|---|
+| All developers work in office only | ✅ GitHub IP Allow List — restrict to office IPs |
+| Developers work remotely sometimes | ✅ VPN required + IP Allow List includes VPN gateway |
+| Fully remote team | ⚠️ IP Allow List impractical — use IdP Conditional Access + managed device checks |
+| Hybrid (office + home) | ✅ VPN + IdP Conditional Access (most common setup) |
+
+> **Recommendation:** If developers already use VPN to access internal resources, add the VPN gateway IP to GitHub's IP allow list. Developers without VPN = no GitHub access. Simple, effective, zero additional cost.
+
+**Effort:** 1 day (Admin + Network team)
+
+---
+
+### 7.10 Developer Usage Policies
 
 **What it is:** Written policies for developers on how to use AI coding tools responsibly.
 
@@ -604,7 +694,7 @@ DEVELOPER AI USAGE POLICY
 
 ---
 
-### 7.10 Complete Security Implementation Checklist
+### 7.11 Complete Security Implementation Checklist
 
 | # | Security Control | Priority | Owner | Effort | Status |
 |---|---|---|---|---|---|
@@ -613,12 +703,14 @@ DEVELOPER AI USAGE POLICY
 | 3 | **Content exclusion** — Block proprietary code directories | 🔴 Critical | Admin + Tech Lead | 1 day | ☐ |
 | 4 | **Organization Copilot policies** — Block public code matches | 🔴 Critical | Admin | 1 hour | ☐ |
 | 5 | **IP protection** — Sign DPA with GitHub | 🔴 Critical | Legal | 1-2 weeks | ☐ |
-| 6 | **Audit logging** — Enable and configure | 🟡 High | Admin + Security | 1-2 days | ☐ |
-| 7 | **Network controls** — Whitelist GitHub, block shadow AI | 🟡 High | Network team | 1-2 days | ☐ |
-| 8 | **Developer usage policy** — Draft and distribute | 🟡 High | Tech Lead + Mgmt | 1 day | ☐ |
-| 9 | **Enterprise Managed Users** (optional) | 🟢 Medium | IT + Admin | 3-5 days | ☐ |
-| 10 | **Audit log streaming** to SIEM (optional) | 🟢 Medium | Security | 2-3 days | ☐ |
-| 11 | **Developer training** — Security awareness | 🟢 Medium | Consultant/Lead | 1 day | ☐ |
+| 6 | **IP Allow List** — Restrict access to company network/VPN | 🔴 Critical | Admin + Network | 1 day | ☐ |
+| 7 | **Audit logging** — Enable and configure | 🟡 High | Admin + Security | 1-2 days | ☐ |
+| 8 | **Network controls** — Whitelist GitHub, block shadow AI | 🟡 High | Network team | 1-2 days | ☐ |
+| 9 | **Developer usage policy** — Draft and distribute | 🟡 High | Tech Lead + Mgmt | 1 day | ☐ |
+| 10 | **Enterprise Managed Users** (optional) | 🟢 Medium | IT + Admin | 3-5 days | ☐ |
+| 11 | **IdP Conditional Access** — Device & location policies | 🟢 Medium | IT Security | 2-3 days | ☐ |
+| 12 | **Audit log streaming** to SIEM (optional) | 🟢 Medium | Security | 2-3 days | ☐ |
+| 13 | **Developer training** — Security awareness | 🟢 Medium | Consultant/Lead | 1 day | ☐ |
 
 > **Total implementation time for all security controls: ~2-3 weeks** (can run in parallel with Phase 1 of the migration plan)
 
