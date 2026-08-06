@@ -21,6 +21,7 @@
 9. [Cost Estimation — Enterprise + Consulting](#9-cost-estimation)
 10. [Timeline Summary](#10-timeline-summary)
 11. [Large C++ Repository — Migration Complexities & Build Infrastructure](#11-large-c-repository--migration-complexities--build-infrastructure)
+12. [Realistic Timeline — End-to-End Project Plan](#12-realistic-timeline--end-to-end-project-plan)
 
 ---
 
@@ -682,4 +683,305 @@ OPTION: Binary Artifact Server (Separate from GitHub)
 
 ---
 
-> **Next step:** Complete prerequisites (Section 2), then kick off Phase 0 demo. The 15-day demo requires minimal licensing investment ($600) and gives management concrete evidence to approve the full rollout.
+## 12. Realistic Timeline — End-to-End Project Plan
+
+> **Assumptions:**
+> - Repository size: **~5 GB** (source + DLLs/libraries)
+> - Users: **75 developers**
+> - Current state: **No security controls** (no SSO, no 2FA, no audit logging)
+> - Scope: Full CVS → GitHub migration + CI/CD + Security + Copilot Enterprise
+> - Single consultant + internal IT team support
+
+### 12.1 Pilot & Demo Timeline
+
+The pilot/demo is the **lowest-risk starting point** — no migration needed, minimal licensing cost.
+
+```
+PILOT & DEMO — 3 WEEKS (REALISTIC)
+
+Week 1: SETUP
+  ├── Day 1-2:  Procurement — GitHub Enterprise trial + 10 Copilot licenses
+  ├── Day 3:    Create GitHub org, configure basic settings
+  ├── Day 3-4:  Set up 10 pilot user GitHub accounts
+  ├── Day 4-5:  Install/verify VS 2022 17.8+ on 10 pilot machines
+  └── Day 5:    Sign in, test Copilot extension works
+  
+  ⚠️ REALISTIC BLOCKER: Procurement may take 3-5 days (approvals, PO, vendor)
+  ⚠️ REALISTIC BLOCKER: IT may need 2 days to install VS 2022 updates
+
+Week 2: DEVELOPER TRIAL
+  ├── Day 6:    Upload copilot-instructions.md with C++ CAE rules
+  ├── Day 6:    30-min training session for pilot users
+  ├── Day 7-10: Pilot users use Copilot on daily C++ work (on CVS files)
+  ├── Day 8:    Mid-week check-in, collect initial feedback
+  └── Day 10:   End of developer trial, collect feedback forms
+
+Week 3: REPORT & DEMO
+  ├── Day 11-12: Compile feedback, create productivity report
+  ├── Day 13:    Prepare demo with before/after coding examples
+  ├── Day 13:    Set up sample GitHub repo for PR review demo
+  ├── Day 14:    Management demo presentation
+  └── Day 15:    Go/No-Go decision
+  
+  ⚠️ REALISTIC BUFFER: Management may need 1-2 weeks to make decision
+```
+
+| Pilot Metric | Value |
+|---|---|
+| **Duration** | 3 weeks (15 working days) |
+| **Users** | 10 developers |
+| **Licensing cost** | ~$600 (10 users × $60/user for 1 month) |
+| **Consultant time** | ~40-50 hours |
+| **Dependencies** | Procurement approval, IT support for VS 2022 updates |
+| **Risk level** | Very low — no migration, no code on GitHub |
+
+---
+
+### 12.2 Full Project — Realistic End-to-End Timeline
+
+```
+PROJECT PARAMETERS:
+  Repository: ~5 GB (source + binaries in LFS)
+  Users:      75 developers
+  Security:   Starting from zero (no SSO, 2FA, audit)
+  Scope:      Migration + CI/CD + Security + Copilot
+```
+
+#### Phase 0: Pilot & Demo (Weeks 1-3)
+
+| Week | Activities | Duration | Dependencies |
+|---|---|---|---|
+| 1 | Procurement, trial setup, 10 user accounts | 5 days | Vendor response time |
+| 2 | Developer trial (10 users on CVS files) | 5 days | VS 2022 updated |
+| 3 | Feedback, report, management demo | 5 days | — |
+| — | **Management decision buffer** | **3-5 days** | Stakeholder calendars |
+
+**Phase 0 total: 3-4 weeks**
+
+---
+
+#### Phase 1: Procurement & Enterprise Setup (Weeks 4-6)
+
+| Week | Activities | Duration | Dependencies |
+|---|---|---|---|
+| 4 | Purchase GitHub Enterprise Cloud (75 seats) | 3-5 days | Budget approval, PO |
+| 4 | Purchase Copilot Enterprise (75 licenses) | 3-5 days | Vendor pricing finalized |
+| 4-5 | Legal: Review GitHub DPA, sign agreements | 5-7 days | Legal team availability |
+| 5 | Create GitHub organization, configure settings | 2 days | Enterprise account active |
+| 5-6 | Identity Provider setup (Azure AD / Okta) | 3-5 days | IT Security team |
+| 6 | Create 75 GitHub accounts, assign teams | 2-3 days | IdP configured |
+
+⚠️ **Realistic blockers:**
+- Procurement can take **2-3 weeks** in large organizations (PO, approvals, vendor contracts)
+- Legal review of DPA can take **1-2 weeks** if legal team is backlogged
+- IdP configuration requires **IT Security team bandwidth** (may be competing priorities)
+
+**Phase 1 total: 3 weeks** (procurement and legal can run in parallel with IdP setup)
+
+---
+
+#### Phase 2: Security Enablement (Weeks 6-8)
+
+| Week | Activities | Duration | Dependencies |
+|---|---|---|---|
+| 6 | SAML/SSO configuration and testing | 3-5 days | IdP ready |
+| 6-7 | 2FA enforcement (give devs 2 weeks to comply) | Ongoing | SSO working |
+| 7 | Content exclusion policies configured | 1 day | Tech Lead input |
+| 7 | Org-wide Copilot policies set | 1 day | Admin access |
+| 7 | IP allow list configured (company network/VPN) | 1-2 days | Network team |
+| 7-8 | Firewall rules (whitelist GitHub, block shadow AI) | 2-3 days | Network team |
+| 8 | Audit logging enabled and tested | 1-2 days | Admin |
+| 8 | Developer AI usage policy drafted and distributed | 2-3 days | Management approval |
+
+⚠️ **Realistic blockers:**
+- 2FA rollout to **75 developers** takes time — some will need hand-holding
+- Network team may have a **2-week backlog** for firewall changes
+- Management review of AI usage policy can take **1 week**
+
+**Phase 2 total: 3 weeks** (overlaps partially with Phase 1)
+
+---
+
+#### Phase 3: Copilot Rollout — On CVS (Weeks 8-10)
+
+| Week | Activities | Duration | Dependencies |
+|---|---|---|---|
+| 8-9 | Install Copilot extension on 75 developer machines | 3-5 days | IT support |
+| 9 | Deploy copilot-instructions.md | 1 day | — |
+| 9 | Developer training session (1 hour, multiple batches) | 2-3 days | Schedule coordination |
+| 9-10 | Developers use Copilot on CVS files | Ongoing | Extensions installed |
+| 10 | Collect feedback, tune copilot-instructions | 2-3 days | — |
+| 10 | Address issues and edge cases | 2-3 days | — |
+
+⚠️ **Realistic blockers:**
+- **75 developer machines** = IT needs to roll out in batches (not all at once)
+- Some machines may need VS 2022 updates (17.8+ required)
+- Training needs to be scheduled around project deadlines
+
+**Phase 3 total: 2-3 weeks**
+
+> **At this point:** All 75 developers have Copilot working on CVS files. Inline completions + Chat fully functional. No migration has happened yet.
+
+---
+
+#### Phase 4: CVS → GitHub Migration (Weeks 10-16)
+
+This is the **longest and highest-risk phase** for a 5 GB repository.
+
+| Week | Activities | Duration | Dependencies |
+|---|---|---|---|
+| 10-11 | CVS repository audit (modules, size, branches, tags) | 3-5 days | CVS access |
+| 11 | Install and test cvs2git / cvs-fast-export | 2-3 days | Build machine |
+| 11-12 | **Test migration** — convert to Git, validate history | 5-7 days | Tool configured |
+| 12 | Fix migration issues (encoding, binary files, branch names) | 3-5 days | Test results |
+| 12-13 | Configure Git LFS for DLLs/libs (.gitattributes) | 1-2 days | Binary audit |
+| 13 | Set up GitHub repo structure (repos, teams, permissions) | 2-3 days | Org structure decided |
+| 13-14 | **Production migration** — push converted repos to GitHub | 2-3 days | LFS configured |
+| 14 | Set up branch protection rules, CODEOWNERS | 1-2 days | — |
+| 14-15 | Set up PR templates and workflows | 1-2 days | — |
+| 15 | Developer training — Git workflow (branches, PRs, merge) | 2-3 days | Multiple batches |
+| 15-16 | **Parallel run** — developers commit to both CVS and GitHub | 5-10 days | All devs trained |
+| 16 | Validate: compare CVS head vs GitHub main | 2 days | Parallel run |
+
+⚠️ **Realistic blockers:**
+- **5 GB repo** with DLLs: cvs2git may take **2-4 hours** per conversion attempt
+- History conversion often has issues: **encoding errors, missing branches, binary file handling**
+- Expect **2-3 test migrations** before the production run
+- Git training for **75 CVS users** who've never used Git = **significant effort**
+- **Parallel run** is essential — can't cut over immediately (developers need confidence)
+
+**Phase 4 total: 6-7 weeks**
+
+---
+
+#### Phase 5: CI/CD Pipeline Setup (Weeks 14-18)
+
+| Week | Activities | Duration | Dependencies |
+|---|---|---|---|
+| 14-15 | Set up self-hosted runners (Windows + Linux) | 2-3 days | Build machines available |
+| 15-16 | Configure MSBuild pipeline (Windows .exe) | 5-7 days | Solution file working on GitHub |
+| 16-17 | Configure CMake/Make pipeline (Linux binaries) | 5-7 days | Linux build machine ready |
+| 17 | Set up dependency management (vcpkg/conan or LFS) | 2-3 days | Dependencies identified |
+| 17-18 | Configure branch protection (require CI pass before merge) | 1 day | Pipelines working |
+| 18 | Test cross-platform matrix build | 2-3 days | Both pipelines working |
+| 18 | Configure Copilot PR reviews on pipelines | 1 day | Pipelines active |
+
+⚠️ **Realistic blockers:**
+- **Custom build scripts** are the #1 risk — mapping proprietary Makefiles to GitHub Actions YAML
+- First successful CI build typically takes **5-10 attempts** to get all dependencies right
+- Self-hosted runner configuration is easy, but **MSBuild environment parity** with developer machines takes debugging
+- **Linux builds may have different dependency versions** than developer machines
+
+**Phase 5 total: 4-5 weeks** (overlaps with Phase 4 from week 14)
+
+---
+
+#### Phase 6: Full Copilot Rollout + CVS Decommission (Weeks 18-22)
+
+| Week | Activities | Duration | Dependencies |
+|---|---|---|---|
+| 18-19 | Enable Copilot codebase indexing (Enterprise feature) | 1-2 days | Code on GitHub |
+| 19 | Enable Copilot PR reviews | 1 day | PRs active |
+| 19-20 | Copilot optimization — tune rules based on real PRs | 3-5 days | PR data available |
+| 20 | Final CVS sync — ensure all commits are in GitHub | 2-3 days | Parallel run data |
+| 20-21 | Set CVS to read-only | 1 day | Management approval |
+| 21 | Knowledge transfer to internal admin | 2-3 days | Admin identified |
+| 21-22 | Productivity report (before vs after) | 2-3 days | 2+ weeks of usage data |
+| 22 | CVS archived for compliance | 1 day | — |
+| 22 | Project close, final documentation | 2 days | — |
+
+**Phase 6 total: 4-5 weeks**
+
+---
+
+### 12.3 Realistic Gantt Chart
+
+```
+REALISTIC TIMELINE — 22 WEEKS (5.5 MONTHS) END-TO-END
+
+Wk 1-3    PHASE 0: Pilot & Demo ██████████████
+Wk 3-4    Decision Buffer ░░░░░░
+Wk 4-6    PHASE 1: Procurement & Setup ████████████
+Wk 6-8    PHASE 2: Security Enablement ████████████
+Wk 8-10   PHASE 3: Copilot on CVS ████████
+Wk 10-16  PHASE 4: CVS → GitHub Migration ██████████████████████████
+Wk 14-18  PHASE 5: CI/CD Pipeline Setup ████████████████
+Wk 18-22  PHASE 6: Full Rollout & Close ████████████████
+
+          ↑ overlap: CI/CD starts during migration
+
+KEY MILESTONES:
+  Week 3:     Pilot complete → Management Go/No-Go ◆
+  Week 6:     Enterprise accounts active, security configured ◆
+  Week 10:    All 75 devs have Copilot (on CVS) ◆
+  Week 16:    All code migrated to GitHub ◆
+  Week 18:    CI/CD pipelines operational ◆
+  Week 20:    CVS set to read-only ◆
+  Week 22:    PROJECT COMPLETE ◆
+```
+
+### 12.4 Aggressive vs Realistic Comparison
+
+| Metric | Aggressive (Section 10) | Realistic (This Section) | Why the Difference |
+|---|---|---|---|
+| **Total duration** | 14 weeks | **22 weeks** | Procurement, legal, training for 75 users |
+| **Pilot/Demo** | 15 days | **3-4 weeks** | Procurement delays, management decision buffer |
+| **Security setup** | 1 week | **3 weeks** | Starting from zero, 75-user 2FA rollout |
+| **CVS migration** | 4 weeks | **6-7 weeks** | 5 GB repo, test migrations, parallel run |
+| **CI/CD setup** | Included in migration | **4-5 weeks dedicated** | Complex C++ builds, MSBuild + Linux |
+| **Copilot optimization** | 2 weeks | **4-5 weeks** | 75 users, more feedback, more tuning |
+| **Buffer for blockers** | None | **~3 weeks total** | Procurement, legal, IT dependencies |
+| **User count** | 50 | **75** | 50% more training, more machines |
+
+### 12.5 What Could Make It Faster or Slower
+
+| Factor | Faster | Slower |
+|---|---|---|
+| **Procurement** | Pre-approved budget, fast PO | Multi-level approval chain |
+| **Legal/DPA** | Standard terms accepted | Legal wants to negotiate every clause |
+| **IT team availability** | Dedicated support | IT is busy with other projects |
+| **CVS complexity** | Clean history, few branches | Messy history, 100+ branches, encoding issues |
+| **Build system** | CMake or standard MSBuild | Custom Makefiles with proprietary scripts |
+| **Developer readiness** | Team familiar with Git | Team has only used CVS for 20 years |
+| **IdP available** | Azure AD already in use | No IdP exists — must deploy one |
+| **Management urgency** | Fast decisions | Committees, reviews, approvals |
+| **Network team** | Fast firewall changes | 3-week change request queue |
+
+### 12.6 Realistic Cost — 75 Users, 22 Weeks
+
+| Cost Category | Monthly | 22-Week Project | Annual (Year 1) |
+|---|---|---|---|
+| GitHub Enterprise Cloud (75 users) | $1,575 | $8,663 | $18,900 |
+| Copilot Enterprise (75 users) | $2,925 | $16,088 | $35,100 |
+| Git LFS storage (~5 GB + bandwidth) | $10-30 | $55-165 | $120-360 |
+| **Total licensing** | **$4,510-4,530** | **$24,806-24,916** | **$54,120-54,360** |
+
+> ⚠️ Enterprise pricing under negotiation with vendor. Actual cost may be lower with volume discounts for 75+ seats.
+
+### 12.7 Summary — Realistic Expectations
+
+```
+FOR MANAGEMENT:
+
+  Pilot/Demo:           3-4 weeks, $600 licensing, 10 users
+  Full project:         22 weeks (5.5 months), 75 users
+  Annual licensing:     ~$54,000/year (GitHub + Copilot)
+  
+  What they'll see:
+    Week 3:   "Does Copilot work for our C++ code?" → Yes/No
+    Week 10:  All developers have Copilot (still on CVS)
+    Week 16:  All code on GitHub
+    Week 18:  Automated builds working
+    Week 22:  CVS gone, fully operational on GitHub + Copilot
+
+FOR YOU (CONSULTANT):
+
+  Pilot effort:         40-50 hours (3 weeks)
+  Full project effort:  300-400 hours (22 weeks)
+  Biggest time sinks:   CVS migration (30%), CI/CD (25%), training (20%)
+  Biggest risks:        Procurement delays, build system complexity, Git training
+```
+
+---
+
+> **Next step:** Complete prerequisites (Section 2), then kick off Phase 0 pilot. The 3-week pilot requires minimal licensing investment ($600) and gives management concrete evidence to approve the full 22-week rollout.
