@@ -1,0 +1,66 @@
+# GitHub Actions CI Pipeline for CAE Solver Demo
+# Demonstrates GitHub Actions CI/CD for the Copilot Enterprise demo
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ libomp-dev
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DENABLE_OPENMP=ON \
+          -DENABLE_TESTS=ON
+
+    - name: Build
+      run: cmake --build build --parallel $(nproc)
+
+    - name: Run Tests
+      working-directory: build
+      run: ctest --output-on-failure --parallel $(nproc)
+
+    - name: Run Demo (smoke test)
+      working-directory: build
+      run: ./cae_demo 4 2 2  # Small mesh for CI speed
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install cppcheck
+      run: sudo apt-get install -y cppcheck
+
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=warning,performance,portability \
+                 --std=c++17 \
+                 --suppress=missingIncludeSystem \
+                 --error-exitcode=1 \
+                 -I include/ \
+                 src/
+
+  # GitHub Copilot PR Review happens automatically when:
+  # 1. Copilot is enabled for the org
+  # 2. A PR is opened/updated
+  # No workflow step needed — it's built into GitHub

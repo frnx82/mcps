@@ -1,0 +1,26 @@
+# ── Core Solver Engine ────────────────────────────────────
+# FEA solver, mesh algorithms — requires senior review
+/src/solver/                @john.doe @sarah.smith
+/src/mesh/                  @john.doe @sarah.smith
+/include/solver/            @john.doe @sarah.smith
+/include/mesh/              @john.doe @sarah.smith
+
+# ── Math Utilities ────────────────────────────────────────
+/src/utils/                 @alice.jones
+/include/utils/             @alice.jones
+
+# ── I/O and File Formats ─────────────────────────────────
+/src/io/                    @bob.williams
+/src/gui/                   @bob.williams
+
+# ── Tests ─────────────────────────────────────────────────
+/tests/                     @qa.team
+
+# ── CI/CD and Build ──────────────────────────────────────
+/.github/                   @devops.team
+/CMakeLists.txt             @devops.team
+/cmake/                     @devops.team
+
+# ── Documentation ────────────────────────────────────────
+/docs/                      @tech.writers
+README.md                   @tech.writers
