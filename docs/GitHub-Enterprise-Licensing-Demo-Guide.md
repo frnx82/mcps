@@ -47,6 +47,55 @@ Do you need to demo Copilot to management?
 
 > The trial gives you the FULL Enterprise Cloud experience — SAML SSO, audit logs, Copilot access, everything. This is identical to what you'd get with a paid license.
 
+### Step 1.5: Choose Enterprise Type — CRITICAL Decision
+
+After clicking "Start a free trial", you'll see two options:
+
+```
+┌─────────────────────────────────────┐  ┌─────────────────────────────────────┐
+│  Enterprise with Personal Accounts  │  │  Enterprise with Managed Users      │
+│                                     │  │  (EMU)                              │
+│  ✅ SELECT THIS FOR DEMO            │  │  ❌ DO NOT SELECT FOR DEMO           │
+└─────────────────────────────────────┘  └─────────────────────────────────────┘
+```
+
+**→ Select "Enterprise with personal accounts"**
+
+Here's why:
+
+| | Personal Accounts ✅ | Managed Users (EMU) ❌ |
+|---|---|---|
+| **How users log in** | Existing GitHub accounts | Accounts provisioned by your IdP (Okta/Azure AD) |
+| **SSO required to start?** | No — can add later | **Yes — no one can log in without IdP configured** |
+| **Setup time** | ⚡ 5 minutes | 🐢 Days-weeks (IdP + SCIM provisioning) |
+| **Suitable for demo?** | ✅ **YES** | ❌ No — too complex, wastes trial time |
+| **Can upgrade to EMU later?** | Yes — migrate to EMU for production | N/A |
+| **Users can have personal repos?** | Yes | No — accounts are fully org-controlled |
+| **Users can access public repos?** | Yes | No — restricted to enterprise repos only |
+
+> **CAUTION:** If you select EMU, you will need to:
+> 1. Have an Identity Provider (Okta, Azure AD, PingFederate) already configured
+> 2. Set up SCIM provisioning to create user accounts
+> 3. All users must be provisioned through the IdP — no self-signup
+> 4. This will consume most of your 30-day trial just on SSO setup
+>
+> **Save EMU for production deployment (after the demo is approved and legal is signed).**
+
+**After selecting "Enterprise with personal accounts":**
+
+1. **Enterprise name**: Enter your company name + `-demo` (e.g., `acme-engineering-demo`)
+2. **Enterprise slug (URL)**: This becomes `github.com/enterprises/acme-engineering-demo`
+3. **Accept terms** and create the enterprise
+4. You'll land on the **Enterprise Dashboard**
+5. **Create an organization** inside the enterprise:
+   - Go to: Enterprise Settings → Organizations → **New Organization**
+   - Name it: `yourcompany-engineering` (this holds your repos)
+6. **Invite demo developers** to the organization:
+   - Go to: `https://github.com/orgs/yourcompany-engineering/people`
+   - Invite 3-5 developers by their GitHub usernames or emails
+7. **Enable Copilot** (see Step 3 below)
+
+
 ### Step 2: Create a Mock Repository for Demo (Day 1-2)
 
 **DO NOT import your real CVS codebase yet.** Instead:
