@@ -227,3 +227,236 @@ headers are open in tabs or referenced in the current file's #includes.
 | Is it effective for a large codebase? | **85% yes** (boilerplate, tests, standard C++), **15% limited** (custom algorithms) |
 | Does it understand cross-module deps? | Only what it can see — open tabs + @workspace help significantly |
 | Should we trust it blindly? | **Never** — always review, especially for solver/domain logic |
+
+---
+
+## Deep Dive: Layer 3 — Where is the Index Stored?
+
+### The index is NOT the same as your Git repository
+
+When GitHub indexes your code for @workspace, it creates **two separate things**:
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    GitHub's Infrastructure                        │
+│                                                                  │
+│  ┌──────────────────────┐    ┌──────────────────────────────┐   │
+│  │  Git Storage          │    │  Search Index (Embeddings)    │   │
+│  │  (Your actual repo)   │    │  (Separate system)            │   │
+│  │                       │    │                               │   │
+│  │  • Source code files  │───▶│  • Vector embeddings of code  │   │
+│  │  • Commit history     │    │  • Semantic search database   │   │
+│  │  • Branches/tags      │    │  • Function/class mappings    │   │
+│  │  • .git metadata      │    │  • NOT raw source code        │   │
+│  │                       │    │  • Mathematical              │   │
+│  │  Stored in: GitHub's  │    │    representations only       │   │
+│  │  Git infrastructure   │    │                               │   │
+│  │  (Azure data centers) │    │  Stored in: GitHub's search   │   │
+│  └──────────────────────┘    │  infrastructure (separate      │   │
+│                               │  from Git storage)             │   │
+│                               └──────────────────────────────┘   │
+│                                          │                        │
+│                                          ▼                        │
+│                           ┌──────────────────────────┐           │
+│                           │  When you ask @workspace  │           │
+│                           │  a question:              │           │
+│                           │                           │           │
+│                           │  1. Search index finds    │           │
+│                           │     relevant files        │           │
+│                           │  2. Raw code snippets     │           │
+│                           │     from those files are  │           │
+│                           │     sent to the LLM       │           │
+│                           │  3. LLM generates answer  │           │
+│                           │  4. Code snippets are     │           │
+│                           │     DISCARDED (not stored) │           │
+│                           └──────────────────────────┘           │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### What exactly is stored where:
+
+| What | Where | Retention |
+|------|-------|-----------|
+| **Your source code** (git repo) | GitHub Git storage (Azure) | Until you delete the repo |
+| **Search index** (embeddings) | GitHub's search infrastructure (separate system) | Updated continuously, deleted if repo is deleted |
+| **Code snippets sent to LLM** | Temporarily in memory during request | **Discarded immediately after response** — NOT stored |
+| **Your prompts/questions** | Temporarily in memory during request | **NOT retained** (Enterprise guarantee) |
+| **Copilot's responses** | Temporarily in memory | **NOT retained** after delivery |
+
+### What are "embeddings"?
+
+The search index doesn't store your raw source code. It stores **mathematical vectors** (embeddings):
+
+```
+Your code:
+  void FEASolver::assemble() {
+      for (int e = 0; e < num_elements; ++e) {
+          computeElementStiffness(e, ke);
+      }
+  }
+
+Becomes an embedding like:
+  [0.234, -0.891, 0.456, 0.123, -0.567, ...]  (1536 floating point numbers)
+
+This vector captures the MEANING of the code ("FEA assembly loop")
+but you CANNOT reconstruct the original source code from the vector.
+```
+
+Think of it like a fingerprint — it identifies the content but you can't reconstruct
+a person from their fingerprint.
+
+**However:** When you actually ask a @workspace question, GitHub retrieves the
+**original code** from the Git repo and sends relevant snippets to the LLM.
+The embedding just helps FIND the right code — the LLM sees real code.
+
+---
+
+## Copilot Enterprise vs Claude Code — Data Handling Comparison
+
+> **This is the most important section for your security team.**
+
+### How each tool handles your code:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  GitHub Copilot Enterprise                        │
+│                                                                  │
+│  Developer types code                                            │
+│       │                                                          │
+│       ▼                                                          │
+│  IDE sends current file + open tabs to GitHub/OpenAI LLM         │
+│       │                                                          │
+│       ▼                                                          │
+│  LLM generates suggestion                                       │
+│       │                                                          │
+│       ▼                                                          │
+│  Suggestion returned to developer                                │
+│       │                                                          │
+│       ▼                                                          │
+│  ❌ Code snippets DISCARDED — not stored, not logged             │
+│  ❌ NOT used for model training                                  │
+│  ❌ NOT retained for any period                                  │
+│                                                                  │
+│  Retention: ZERO (Enterprise contractual guarantee)              │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                  Claude Code (Anthropic)                          │
+│                                                                  │
+│  Developer opens project in Claude Code                          │
+│       │                                                          │
+│       ▼                                                          │
+│  Claude reads files from your local machine                      │
+│       │                                                          │
+│       ▼                                                          │
+│  Code sent to Anthropic's API servers                            │
+│       │                                                          │
+│       ▼                                                          │
+│  Claude generates response                                       │
+│       │                                                          │
+│       ▼                                                          │
+│  ⚠️ DEFAULT: Prompts + code retained for UP TO 30 DAYS          │
+│  ⚠️ Used for safety monitoring and abuse prevention              │
+│  ⚠️ MAY be used for model improvement (unless opted out)         │
+│                                                                  │
+│  Retention: UP TO 30 DAYS (default)                              │
+│  With Enterprise plan + ZDR: ZERO (must be negotiated)           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Side-by-side comparison:
+
+| Aspect | GitHub Copilot Enterprise | Claude Code (Default) | Claude Code (Enterprise + ZDR) |
+|--------|--------------------------|----------------------|-------------------------------|
+| **Where code is sent** | GitHub/OpenAI servers | Anthropic servers | Anthropic servers |
+| **Code retention** | ❌ None (0 days) | ⚠️ Up to 30 days | ❌ None (0 days) |
+| **Used for training?** | ❌ Never (contractual) | ⚠️ May be (default) | ❌ Never (contractual) |
+| **Who sees your code?** | LLM only (no human review) | May be reviewed for safety | LLM only (no human review) |
+| **Code lives on your machine?** | Code on GitHub servers (repo) | Code on your local machine | Code on your local machine |
+| **Requires code on vendor servers?** | Yes (GitHub hosts the repo) | No (reads local files) | No (reads local files) |
+| **Enterprise agreement needed?** | Yes (GitHub Enterprise) | Yes (Anthropic Enterprise) | Yes + Zero Data Retention add-on |
+| **SOC 2 certified?** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Data Processing Agreement?** | ✅ Included | ✅ Available | ✅ Available |
+
+### Key differences explained:
+
+**1. Where your code physically lives:**
+
+```
+Copilot:  Your code is already ON GitHub's servers (it's a Git repo).
+          Copilot reads from what's already there.
+          
+Claude:   Your code stays on YOUR machine/laptop.
+          Claude reads local files and sends snippets to Anthropic's API.
+```
+
+**2. The 30-day retention issue with Claude:**
+
+By default (without Enterprise plan), when Claude Code reads your file:
+```
+Your file: src/solver/FEASolver.cpp (500 lines)
+          │
+          ▼
+Claude reads it → sends to Anthropic API
+          │
+          ▼
+Anthropic stores the prompt (including your code) for up to 30 days
+          │
+          ▼
+During those 30 days:
+  - Anthropic MAY review it for safety/abuse
+  - It MAY be used to improve models (unless opted out)
+  - It is stored on Anthropic's servers
+          │
+          ▼
+After 30 days: automatically deleted
+```
+
+**With Anthropic Enterprise + Zero Data Retention (ZDR):**
+```
+Your file → Claude reads → Anthropic API → Response generated → DISCARDED
+                                              (zero retention, zero training)
+```
+
+**3. Which is safer for your company?**
+
+| Scenario | Safer Option | Why |
+|----------|-------------|-----|
+| Code already on GitHub | **Copilot** | Code is already there, no additional exposure |
+| Code only on local machines (not migrated yet) | **Claude + ZDR** | Code never leaves to a second vendor |
+| Maximum contractual protection | **Both require Enterprise agreements** | Similar guarantees when properly configured |
+| During the demo (mock code) | **Doesn't matter** | Mock code has no IP to protect |
+
+### What to tell your security team:
+
+> **For the demo:** We're using mock code — no security risk with either tool.
+>
+> **For production with Copilot Enterprise:**
+> - Our code is already on GitHub (we chose to host it there)
+> - Copilot reads from what's already there — no additional exposure
+> - Enterprise agreement guarantees: zero retention, zero training
+> - This is contractually binding and auditable (SOC 2)
+>
+> **If we also want Claude Code for production:**
+> - Must get Anthropic Enterprise plan with Zero Data Retention (ZDR)
+> - Without ZDR, code snippets are retained for 30 days — NOT acceptable
+> - With ZDR, same guarantees as Copilot Enterprise
+
+---
+
+## Updated Summary
+
+| Question | Answer |
+|----------|--------|
+| Does Copilot use our data structures? | **Yes, if they're visible** (current file or open tabs) |
+| Does it invent its own? | **Yes, if it has no context** — it falls back to general patterns |
+| How to make it use ours? | Open relevant headers, add context comments, use @workspace |
+| Is it effective for a large codebase? | **85% yes** (boilerplate, tests, standard C++), **15% limited** (custom algorithms) |
+| Does it understand cross-module deps? | Only what it can see — open tabs + @workspace help significantly |
+| Should we trust it blindly? | **Never** — always review, especially for solver/domain logic |
+| Where is the @workspace index stored? | Separate from Git repo — vector embeddings on GitHub's search infra |
+| Is raw code stored in the index? | **No** — embeddings only. But real code IS sent to LLM during queries |
+| Does Copilot retain our code? | **No** — Enterprise guarantees zero retention after response |
+| Does Claude Code retain our code? | **Default: 30 days.** Enterprise + ZDR: zero retention |
+| Which is safer? | Both are safe WITH Enterprise agreements. Without Enterprise, Copilot is safer (zero retention by default) |
+
