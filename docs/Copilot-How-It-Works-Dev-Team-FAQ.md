@@ -444,6 +444,181 @@ Your file → Claude reads → Anthropic API → Response generated → DISCARDE
 
 ---
 
+## Model vs Product: Does Claude "See" Our Code Through Copilot?
+
+> **Developer question:** "If Copilot uses Claude models to write code on our data
+> structures, does that mean Claude/Anthropic gets access to read our code?"
+
+### Short answer:
+**Yes, Anthropic's servers process your code when Copilot routes to a Claude model.
+BUT — GitHub's Enterprise contract governs the data handling, NOT Anthropic's
+default terms. Zero retention, zero training.**
+
+### The data flow when Copilot uses Claude:
+
+```
+Your code in VS Code
+     │
+     ▼
+GitHub Copilot Extension (IDE plugin)
+     │
+     ▼
+GitHub's API Gateway (GitHub controls this)
+     │
+     ├──▶ Route to OpenAI GPT-4o     ← GitHub's default model
+     ├──▶ Route to Anthropic Claude   ← If you selected Claude in Copilot settings
+     └──▶ Route to Google Gemini      ← If you selected Gemini
+     │
+     ▼
+Selected model processes your code → returns suggestion
+     │
+     ▼
+GitHub's API Gateway receives response
+     │
+     ▼
+Suggestion appears in your IDE
+```
+
+### What is a "Model" vs a "Product"?
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│  "Claude" the MODEL (the brain/engine)                           │
+│  ──────────────────────────────────────                          │
+│  • An AI engine that processes text and code                     │
+│  • Can be embedded INSIDE other products (like Copilot)          │
+│  • Like an Intel chip inside a Dell laptop — Intel makes         │
+│    the chip, Dell makes the laptop, you buy from Dell            │
+│  • When used inside Copilot: Anthropic is a SUBPROCESSOR         │
+│    under GitHub's contract                                       │
+│                                                                  │
+│                         vs                                       │
+│                                                                  │
+│  "Claude Code" the PRODUCT (the tool)                            │
+│  ────────────────────────────────────                            │
+│  • Anthropic's own standalone coding tool                        │
+│  • You interact with Anthropic DIRECTLY                          │
+│  • Like buying a computer directly from Intel                    │
+│  • Anthropic's own terms of service apply                        │
+│  • Default: 30-day data retention                                │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### The "Engine in a Car" Analogy
+
+```
+GitHub Copilot = The car you bought
+Claude Sonnet  = One of several engines available in that car
+
+When you drive the car (use Copilot):
+  • You have a contract with GitHub (the car manufacturer)
+  • GitHub installed the Claude engine and has its OWN contract
+    with Anthropic (the engine maker)
+  • GitHub's contract says: "Don't record where the driver goes,
+    don't use their driving data for anything"
+  • The engine DOES process your driving (code), but:
+    ❌ Does NOT store it
+    ❌ Does NOT use it for training
+    ❌ Does NOT share it with anyone
+  • If Anthropic violates this → GitHub is liable to YOU
+
+Claude Code = Buying the engine directly from Anthropic
+  • You have a contract with Anthropic directly
+  • Anthropic's default terms: "We record your trips for 30 days"
+  • You CAN negotiate zero recording (Enterprise + ZDR)
+  • But YOU must negotiate it yourself
+```
+
+### The contractual chain:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ Using Claude model THROUGH Copilot:                      │
+│                                                          │
+│  You ←──contract──▶ GitHub ←──subprocessor──▶ Anthropic  │
+│       (Enterprise        (GitHub's contract              │
+│        Agreement)         prohibits retention)            │
+│                                                          │
+│  • GitHub is the DATA PROCESSOR                          │
+│  • Anthropic is a SUB-PROCESSOR                          │
+│  • GitHub is accountable for Anthropic's compliance      │
+│  • Your code: ZERO retention, ZERO training              │
+│  • Anthropic is listed on GitHub's subprocessor list:    │
+│    https://github.com/subprocessors                      │
+└──────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────┐
+│ Using Claude Code DIRECTLY:                              │
+│                                                          │
+│  You ←──contract──▶ Anthropic                            │
+│       (Anthropic's                                       │
+│        Terms of Service)                                 │
+│                                                          │
+│  • Anthropic is the DATA PROCESSOR (directly)            │
+│  • Default: UP TO 30 DAYS retention                      │
+│  • Default: MAY use for model improvement                │
+│  • Enterprise + ZDR: zero retention (must be negotiated) │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Side-by-side: Three scenarios compared
+
+| Aspect | Copilot + OpenAI model | Copilot + Claude model | Claude Code (standalone) |
+|--------|----------------------|----------------------|------------------------|
+| **Code sent to** | OpenAI servers | Anthropic servers | Anthropic servers |
+| **Contract governs** | GitHub Enterprise | GitHub Enterprise | Anthropic ToS |
+| **Who is accountable** | GitHub | GitHub | Anthropic |
+| **Retention** | Zero | Zero | 30 days (default) |
+| **Training** | Never | Never | May be (default) |
+| **Can admin control?** | ✅ Can block this model | ✅ Can block this model | N/A (separate product) |
+| **Subprocessor relationship** | OpenAI is GitHub's subprocessor | Anthropic is GitHub's subprocessor | Anthropic is primary |
+
+### Admin Controls: Restricting Which Models Copilot Uses
+
+If your security team does NOT want any code going to Anthropic (even through Copilot),
+you can restrict it:
+
+**Steps:**
+1. Go to: `https://github.com/enterprises/depusa/settings/copilot`
+2. Find: **"Model selection"** or **"Model policy"**
+3. Options:
+   - **Allow all models** — developers can choose GPT-4o, Claude, Gemini
+   - **Restrict to specific models** — e.g., only GPT-4o (OpenAI)
+   - **Block specific models** — e.g., block Claude, allow everything else
+4. Save the policy
+
+**This means:**
+```
+Security team says: "We only trust OpenAI, not Anthropic"
+  → Admin restricts Copilot to GPT-4o only
+  → No code ever goes to Anthropic's servers
+  → Developers can still use Copilot, just with one model
+
+Security team says: "We trust all GitHub subprocessors"
+  → Admin allows all models
+  → Developers can choose the best model for their task
+```
+
+### What to tell your developer:
+
+> "When Copilot uses Claude as a model, yes — Anthropic's servers process our code
+> temporarily. But there are two key protections:
+>
+> 1. **Contractual:** GitHub's Enterprise agreement with Anthropic prohibits
+>    retention and training. Anthropic is a subprocessor under GitHub's terms,
+>    not their own default 30-day retention terms.
+>
+> 2. **Technical:** As admins, we can restrict Copilot to use only specific
+>    models. If we don't want code going to Anthropic at all, we block Claude
+>    models and only allow OpenAI GPT-4o.
+>
+> This is very different from using Claude Code directly, where Anthropic's
+> default terms (30-day retention) apply unless we negotiate an Enterprise plan."
+
+---
+
 ## Updated Summary
 
 | Question | Answer |
@@ -459,4 +634,6 @@ Your file → Claude reads → Anthropic API → Response generated → DISCARDE
 | Does Copilot retain our code? | **No** — Enterprise guarantees zero retention after response |
 | Does Claude Code retain our code? | **Default: 30 days.** Enterprise + ZDR: zero retention |
 | Which is safer? | Both are safe WITH Enterprise agreements. Without Enterprise, Copilot is safer (zero retention by default) |
-
+| Does Claude "see" code through Copilot? | **Yes, temporarily** — but under GitHub's contract (zero retention), not Anthropic's default terms |
+| Can we block Claude in Copilot? | **Yes** — admins can restrict to specific models (e.g., GPT-4o only) |
+| What's the difference: model vs product? | **Model in Copilot** = GitHub's contract governs. **Claude Code standalone** = Anthropic's contract governs |
