@@ -194,11 +194,58 @@ Developers can switch between models using the **model picker** dropdown in Copi
 
 ![Available AI Models in Copilot for C++](images/cpp_ai_models_1784556857252.png)
 
+### AI Credits Billing Model (Effective June 2026)
+
+> **Key Change:** As of June 1, 2026, GitHub transitioned from flat "premium request" billing to **usage-based billing** via **GitHub AI Credits**. 1 AI Credit = $0.01 USD.
+
+#### What Consumes Credits vs. What's Unlimited
+
+| Feature | Consumes Credits? | Details |
+|---|---|---|
+| **Code completions** (inline autocomplete) | ❌ **No — Unlimited** | Free on all paid plans, no limits |
+| **Next Edit Suggestions** | ❌ **No — Unlimited** | Free on all paid plans |
+| **Copilot Chat** | ⚠️ **Yes** | Each chat message consumes tokens |
+| **Agent Mode** (multi-step agentic coding) | ⚠️ **Yes — Heavy** | Can be 10-1,000× more tokens than chat |
+| **Copilot Code Review** (PR reviews) | ⚠️ **Yes** | Each review consumes tokens |
+| **Copilot Cloud Agent** | ⚠️ **Yes — Heavy** | Autonomous sessions are expensive |
+| **Copilot CLI** | ⚠️ **Yes** | Command-line interactions |
+
 ### Token Pricing Per Model
+
+Credits are consumed based on actual **tokens processed** (input + output + cached). Different models have different rates:
+
+| Model Category | Example Models | Input ($/1M tokens) | Output ($/1M tokens) | Relative Cost |
+|---|---|---|---|---|
+| **Lightweight** | GPT-5 mini, Claude Haiku | ~$0.25 | ~$2.00 | 💚 Cheapest |
+| **Versatile** | GPT-4o/5.4, Claude Sonnet | ~$2.50 | ~$15.00 | 🟡 Moderate |
+| **Powerful** | GPT-5.3 Codex | ~$1.75 | ~$14.00 | 🟠 Moderate-High |
+| **Ultra-Premium** | Claude Opus, o3 | Higher | Higher | 🔴 Most Expensive |
+
+> **Note:** Cached input tokens are significantly discounted (e.g., GPT-5 mini cached: $0.025/1M vs $0.25/1M standard). Using "auto model selection" may qualify for a 10% discount.
 
 ![Token Pricing Per Model](images/cpp_token_pricing_1784560131745.png)
 
+### Typical Credit Consumption Per Activity
+
+| Activity | Typical Token Usage | Approx Credit Cost | Notes |
+|---|---|---|---|
+| Simple chat question | ~1K-3K tokens | ~$0.01-0.05 | "How do I use std::variant?" |
+| Code explanation (1 file) | ~5K-15K tokens | ~$0.05-0.30 | "Explain this function" |
+| PR code review | ~10K-50K tokens | ~$0.10-1.00 | Depends on PR size |
+| Agent mode (simple) | ~50K-200K tokens | ~$0.50-3.00 | Fix a bug, write a test |
+| Agent mode (complex) | ~500K-2M+ tokens | ~$1.00-10.00+ | Multi-file refactoring |
+| Cloud agent (autonomous) | ~1M-5M+ tokens | ~$5.00-50.00+ | Repository-wide tasks |
+
 ### Which Model to Use for What (C++ Recommendation)
+
+| Task | Recommended Model | Why |
+|---|---|---|
+| Routine chat, quick answers | **Lightweight** (GPT-5 mini) | Fastest, cheapest — preserves credits |
+| Code review, standard C++ | **Versatile** (GPT-4o, Claude Sonnet) | Good balance of quality vs. cost |
+| Complex TMP, solver logic | **Powerful/Ultra-Premium** (Claude Opus, o3) | Best reasoning for complex C++ |
+| Boilerplate, getters/setters | **Lightweight** | Don't waste credits on simple tasks |
+| Multi-file refactoring | **Versatile** | Good enough for structural changes |
+| Understanding legacy code | **Ultra-Premium** | Large context + deep reasoning needed |
 
 ![Which Model to Use for What — C++ Recommendation](images/cpp_model_recommend_1784560138309.png)
 
@@ -210,41 +257,156 @@ Developers can switch between models using the **model picker** dropdown in Copi
 
 ![Copilot Business vs Enterprise](images/cpp_business_vs_enterprise_1784556923931.png)
 
+### Monthly AI Credit Allowances Per Plan
+
+| Plan | Monthly Price | Included AI Credits/User | Credit $ Value | Key Additions Over Lower Plan |
+|---|---|---|---|---|
+| **Free** | $0 | Limited | Very limited | Basic completions only |
+| **Pro** | $10 | 1,500 | $15.00 | Unlimited completions + chat |
+| **Pro+** | $39 | 7,000 | $70.00 | Higher credit allowance |
+| **Max** | $100 | 20,000 | $200.00 | Highest individual allowance |
+| **Business** | $19/user | 1,900/user | $19.00/user | Org management, **pooled credits** |
+| **Enterprise** | $39/user | 3,900/user | $39.00/user | + codebase indexing, policy controls, knowledge bases |
+
+> **Pooled Credits (Business & Enterprise):** Individual seat credits are **pooled** at the organization level. A team of 50 developers shares the total monthly allowance, allowing power users to draw more credits while lighter users offset that consumption.
+
 ### Recommendation
 
 ![Cost Analysis — 50 Developers, All Scenarios](images/cpp_cost_scenarios_1784560145920.png)
 
 > **Recommendation:** Start with **Copilot Business** ($19/user). Upgrade specific teams to Enterprise later if codebase indexing proves valuable. The core review and completion features are identical between plans.
 
+> **Important Note:** GitHub Enterprise license ($21/user/month) is **separate** from Copilot subscription. Total Enterprise stack = $21 (GitHub Enterprise) + $39 (Copilot Enterprise) = **$60/user/month**.
+
 ---
 
-## 9. Cost Analysis — 50 Developers, High Usage
+## 9. Cost Analysis — 50 Developers, AI Credits & Overage
 
 ### Base Subscription Cost
 
+| Plan | Per User/Mo | 50 Users/Mo | Annual | Included Credit Pool |
+|---|---|---|---|---|
+| **Copilot Business** | $19 | $950 | **$11,400** | 95,000 credits ($950 value) |
+| **Copilot Enterprise** | $39 | $1,950 | **$23,400** | 195,000 credits ($1,950 value) |
 
-> This is the **minimum guaranteed cost**. Code completions are unlimited and free beyond this.
+> This is the **minimum guaranteed cost**. Code completions are unlimited and free beyond this. The credit pool covers Chat, Agent Mode, Code Review, and other metered features.
 
 ### What "High Usage Per Day" Looks Like
 
+| Activity | Frequency | Daily Credits | Monthly Credits |
+|---|---|---|---|
+| Code completions | Continuous | **0** (unlimited) | **0** |
+| Chat questions | 10-15/day | ~50-150 | ~1,000-3,000 |
+| PR reviews | 1-2/day | ~20-200 | ~400-4,000 |
+| Agent mode (simple) | 2-3/day | ~100-900 | ~2,000-18,000 |
+| Agent mode (complex) | 1/day | ~100-1,000+ | ~2,000-20,000+ |
 
 ### Cost Scenarios for 50 Developers
 
 Not all 50 developers will be heavy users. Realistic distribution:
 
+| Usage Profile | % of Devs | Devs | Credits/User/Mo | Total Credits |
+|---|---|---|---|---|
+| **Light** (completions + occasional chat) | 40% | 20 | ~500 | 10,000 |
+| **Moderate** (daily chat + weekly agent) | 40% | 20 | ~2,500 | 50,000 |
+| **Heavy** (daily agent + PR reviews) | 15% | 7-8 | ~5,000 | 37,500 |
+| **Power** (continuous agentic workflows) | 5% | 2-3 | ~10,000+ | 25,000+ |
+| | | **Total** | | **~122,500** |
 
-### Annual Cost Summary — High Usage
+With Copilot Business pool of 95,000 credits → **~27,500 credits overage** (~$275/month).
 
+### Annual Cost Summary — All Scenarios
+
+| Scenario | Base Cost | Monthly Overage | Annual Overage | **Total Annual** | Per Dev/Year |
+|---|---|---|---|---|---|
+| **Conservative** (mostly completions) | $11,400 | $0 | $0 | **$11,400** | $228 |
+| **Moderate** (regular chat + some agent) | $11,400 | ~$300 | ~$3,600 | **~$15,000** | ~$300 |
+| **Heavy** (frequent agent mode) | $11,400 | ~$800 | ~$9,600 | **~$21,000** | ~$420 |
+| **Aggressive agentic** (all devs daily agent) | $11,400 | ~$1,500+ | ~$18,000+ | **~$29,400+** | ~$588+ |
+| **Hard cap ($0 overage)** | $11,400 | $0 | $0 | **$11,400** | $228 |
 
 ### With Spending Cap ($0 Overage)
 
+```
+With hard cap enabled:
+  ✅ Code completions — STILL WORK (unlimited, always)
+  ✅ Next Edit Suggestions — STILL WORK (unlimited, always)
+  ❌ Copilot Chat — BLOCKED when credits exhausted
+  ❌ Agent Mode — BLOCKED when credits exhausted
+  ❌ PR Code Review — BLOCKED when credits exhausted
+  ❌ Cloud Agent — BLOCKED when credits exhausted
 
-### Daily Cost Per Developer
+Key insight: The features developers use MOST (completions)
+             are never affected by credit limits.
+```
 
+### Overage Charges — How They Work
 
-### The $50K Question
+```
+Scenario 1: NO spending cap set (⚠️ risky)
+  Month starts → 95,000 pooled credits
+  Day 15 → Credits exhausted
+  Day 16-30 → Usage CONTINUES at per-token rates
+  End of month → Overage billed to organization
+
+Scenario 2: Hard spending cap ($0 overage)
+  Month starts → 95,000 pooled credits
+  Day 15 → Credits exhausted
+  Day 16-30 → Chat/Agent/Review BLOCKED
+  ✅ Completions still work (unlimited)
+  End of month → No surprise bill
+
+Scenario 3: Budget cap with limit (e.g., $500/month max overage)
+  Month starts → 95,000 pooled credits
+  Day 15 → Credits exhausted
+  Day 16-25 → Overage accrues (up to $500)
+  Day 26 → Cap hit → Chat/Agent/Review BLOCKED
+  ✅ Completions still work (unlimited)
+  End of month → Predictable $500 overage
+```
+
+### Admin Budget Controls — Preventing Surprise Bills
+
+| Control | What It Does | Hard Stop? |
+|---|---|---|
+| **AI Credits Paid Usage Policy** | Master switch: disable to block ALL overage | **Yes (if disabled)** |
+| **Enterprise/Org Budget** | Cap total org overage spend | **Only if "Stop usage" is enabled** |
+| **Universal User-Level Budget (ULB)** | Cap per-individual consumption | **Yes (always)** |
+
+**Configuration Steps:**
+
+1. Go to: `Enterprise Settings → Billing → GitHub Copilot`
+2. **AI Credits Paid Usage Policy** → DISABLE to block all overage (safest start)
+3. If allowing overage, set an **Org Budget** with a dollar limit
+   - ⚠️ **MUST enable "Stop usage when budget limit is reached"** — if disabled, it only notifies!
+4. Set **Universal User-Level Budget** → default per-user cap (e.g., 3,000 credits/month)
+   - Override individually for power users who need higher limits
+
+### Recommended Strategy
+
+```
+Month 1-2: HARD CAP ($0 overage)
+  → Measure actual usage patterns across the team
+  → Identify who are the heavy vs. light users
+  → Annual cost: $11,400 (fixed, predictable)
+
+Month 3+: SET A REASONABLE OVERAGE BUDGET
+  → Based on actual data, set $300-500/month overage limit
+  → Set per-user budgets (ULBs) to prevent one user draining the pool
+  → Review monthly usage reports by user, model, and repository
+
+Ongoing: OPTIMIZE
+  → Encourage lightweight models for routine tasks
+  → Reserve frontier models (Opus, o3) for complex C++ reasoning
+  → Use "auto model selection" for potential 10% discount
+  → Estimated steady-state: $15,000-21,000/year for 50 devs
+```
+
+### The Bottom Line
 
 ![Annual Cost — 50 Developers, All Scenarios](images/cpp_cost_50_devs_1784556931600.png)
+
+> **For management:** The $19/user subscription covers unlimited code completions — the feature developers use most. Chat and agentic features consume AI Credits from a monthly pool. With a hard spending cap, cost is fixed at **$11,400/year**. With moderate usage allowing overage, expect **$15,000-21,000/year**. Budget controls give you full visibility and hard stops.
 
 ---
 
@@ -477,8 +639,21 @@ Additional rules for file import/export:
 
 ### Cost at a Glance (50 Developers)
 
+| Scenario | Annual Cost | Per Dev/Year | Notes |
+|---|---|---|---|
+| Copilot Business, hard cap | **$11,400** | $228 | Completions unlimited; chat/agent blocked when credits out |
+| Copilot Business, moderate use | **~$15,000-21,000** | ~$300-420 | Recommended: set $300-500/mo overage budget |
+| Copilot Enterprise, hard cap | **$23,400** | $468 | 2× credits + codebase indexing |
+| Full stack (GitHub $21 + Copilot Ent $39) | **$36,000** | $720 | GitHub Enterprise + Copilot Enterprise |
 
 ### Models — Which to Use When
+
+| Task | Model Tier | Credit Impact |
+|---|---|---|
+| Quick chat questions, boilerplate | **Lightweight** (GPT-5 mini) | 💚 Minimal |
+| Code review, standard C++ | **Versatile** (Claude Sonnet, GPT-4o) | 🟡 Moderate |
+| Complex TMP, solver debugging | **Ultra-Premium** (Claude Opus, o3) | 🔴 Heavy |
+| Agent mode refactoring | **Versatile** | 🟡 Moderate per step, but many steps |
 
 
 ---
