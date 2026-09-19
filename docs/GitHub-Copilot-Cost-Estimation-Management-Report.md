@@ -74,6 +74,58 @@ Both plans include credits worth exactly their seat price. Both bill overage at 
 
 Across 5 seats, Enterprise wastes up to **$1,200/year** in over-provisioned credits.
 
+### Security — Identical on Both Plans
+
+There are **no additional security risks** with Copilot Business compared to Enterprise. The security posture is the same.
+
+| Security Feature | Copilot Business | Copilot Enterprise |
+|---|---|---|
+| Code NOT used for model training | ✅ | ✅ |
+| Prompts/code NOT retained after response | ✅ | ✅ |
+| Data encrypted in transit (TLS) and at rest | ✅ | ✅ |
+| SOC 2 Type II certified | ✅ | ✅ |
+| Content exclusion policies (block specific repos) | ✅ | ✅ |
+| IP indemnity (copyright protection) | ✅ | ✅ |
+| Public code filter (block matching suggestions) | ✅ | ✅ |
+| Organization policy controls | ✅ | ✅ |
+
+The security controls that matter for a CAE company — SAML SSO, enterprise audit log, IP allow lists, secret scanning, and code scanning — come from **GitHub Enterprise** (the $21/user platform), not from the Copilot tier. You get all of these with Copilot Business + GitHub Enterprise.
+
+| Security Control | Source | Included With |
+|---|---|---|
+| SAML SSO / SCIM provisioning | GitHub Enterprise (platform) | ✅ GH Enterprise $21/user |
+| Enterprise audit log (who did what, when) | GitHub Enterprise (platform) | ✅ GH Enterprise $21/user |
+| IP allow lists (restrict by network) | GitHub Enterprise (platform) | ✅ GH Enterprise $21/user |
+| Secret scanning | GitHub Enterprise (platform) | ✅ GH Enterprise $21/user |
+| Code scanning (CodeQL) | GitHub Enterprise (platform) | ✅ GH Enterprise $21/user |
+
+> **Bottom line:** Choosing Copilot Business over Enterprise introduces **zero additional security risk**. All enterprise security features come from the GitHub Enterprise platform licence, which is included in the recommended Option 2.
+
+The one security consideration with Copilot (on any tier) is that code snippets are sent to cloud AI providers (Microsoft, OpenAI, Anthropic, Google) for processing. They are **not stored or used for training**, but they do leave your network during the request. This is the same on both Business and Enterprise.
+
+### Automatic PR Code Reviews — Available on Both Plans
+
+Yes, **Copilot automatic PR code review works with Copilot Business.** It is not an Enterprise-only feature.
+
+| PR Review Feature | Copilot Business | Copilot Enterprise |
+|---|---|---|
+| Automatic code review on pull requests | ✅ | ✅ |
+| Inline review comments with suggestions | ✅ | ✅ |
+| Security vulnerability detection | ✅ | ✅ |
+| Code quality feedback | ✅ | ✅ |
+| Custom review instructions (`.github/copilot-review-instructions.md`) | ✅ | ✅ |
+| Trigger: request review from "Copilot" on any PR | ✅ | ✅ |
+| Auto-trigger on every PR (org setting) | ✅ | ✅ |
+| Uses AI credits | ✅ ~10-100 credits/review | ✅ ~10-100 credits/review |
+
+To enable automatic PR reviews:
+1. Go to **Organization Settings → Copilot → Policies**
+2. Enable **"Copilot code review"**
+3. Optionally enable **auto-review** to trigger Copilot on every new PR
+4. Developers can also manually request a review by adding **"Copilot"** as a reviewer on any PR
+
+> **Cost impact:** At ~50 credits per review and ~1 PR/developer/day, PR reviews cost approximately **$1.10/developer/month** — negligible.
+
 ---
 
 ## 3. Purchase Options for 5 Users
@@ -357,6 +409,15 @@ A: Yes. Copilot Business seats bill monthly and can be dropped. GitHub Support c
 **Q: How do we pay for Copilot Business?**
 A: Credit card or Azure subscription only — GitHub does not offer annual invoicing for Business seats. If finance requires a single annual invoice, routing Copilot through an existing Azure agreement is the cleanest answer.
 
+**Q: Are there security risks with Copilot Business compared to Enterprise?**
+A: No. The security posture is identical on both plans — code is not used for training, prompts are not retained, data is encrypted, and both are SOC 2 Type II certified. The enterprise security controls (SSO, audit log, IP allow lists, code scanning) come from the GitHub Enterprise platform licence, not the Copilot tier. You get all of them with Copilot Business + GitHub Enterprise.
+
+**Q: Does our code get sent to the cloud?**
+A: Yes — code snippets are sent to AI providers (Microsoft, OpenAI, Anthropic, Google) for processing during chat, agent mode, and PR reviews. They are not stored or used for training, but they do leave your network during the request. This is the same on both Business and Enterprise.
+
+**Q: Can we get automatic PR code reviews with Copilot Business?**
+A: Yes. Copilot code review is available on both Business and Enterprise. You can configure it to automatically review every PR, or developers can manually request a review by adding "Copilot" as a reviewer. Each review uses approximately 10-100 AI credits (~$0.50-1.00).
+
 **Q: What is the return on this spend?**
 A: Expected cost is $482/month for the team. If Copilot saves each developer 3 hours/week at $50/hour loaded rate, that is ~$3,000/month of recovered capacity — roughly **6× the cost**.
 
@@ -365,6 +426,108 @@ A: We don't — and that is stated plainly. This is a bottom-up model, not measu
 
 ---
 
+## 12. Option Comparison — Pros & Cons
+
+### What Each Option Includes
+
+| Feature | Option 1: Copilot Business Only ($19/user) | Option 2: GH Enterprise + Copilot Business ($40/user) | Option 3: GH Enterprise + Copilot Enterprise ($60/user) |
+|---|---|---|---|
+| **AI Code Completions** | ✅ Unlimited, free | ✅ Unlimited, free | ✅ Unlimited, free |
+| **Copilot Chat** | ✅ | ✅ | ✅ |
+| **Agent Mode** | ✅ | ✅ | ✅ |
+| **Automatic PR Code Reviews** | ✅ (needs code on GitHub) | ✅ | ✅ |
+| **All AI Models** | ✅ Identical | ✅ Identical | ✅ Identical |
+| **AI Security (no training, encryption)** | ✅ Identical | ✅ Identical | ✅ Identical |
+| **Included AI Credits/user** | 1,900 ($19) | 1,900 ($19) | 3,900 ($39) |
+| **GitHub Repository Hosting** | ✅ (Free or Team plan) | ✅ Enterprise | ✅ Enterprise |
+| **SAML SSO / SCIM** | ❌ | ✅ | ✅ |
+| **Enterprise Audit Log** | ❌ | ✅ | ✅ |
+| **IP Allow Lists** | ❌ | ✅ | ✅ |
+| **Secret Scanning (full)** | ❌ | ✅ | ✅ |
+| **Code Scanning (CodeQL)** | ❌ | ✅ | ✅ |
+| **GitHub Actions Minutes** | 2,000-3,000/month | 50,000/month | 50,000/month |
+| **Git LFS Storage** | 250 GiB | 250 GiB | 250 GiB |
+| **Packages Storage** | 2 GB | 50 GB | 50 GB |
+| **Annual Invoicing** | ❌ Credit card or Azure only | ✅ For GitHub Enterprise | ✅ For everything |
+| **5 Users Monthly** | **$95** | **$200** | **$300** |
+| **5 Users Annual** | **$1,140** | **$2,400** | **$3,600** |
+
+---
+
+### Option 1: Copilot Business Only ($19/user/month)
+
+*GitHub Team ($4/user) or GitHub Free + Copilot Business ($19/user)*
+
+| ✅ Pros | ❌ Cons |
+|---|---|
+| Cheapest option — $23/user/month (with Team) | No SAML SSO — manual user management |
+| Same AI models and features as Enterprise | No enterprise audit log — can't track who did what |
+| Same security posture for Copilot | No IP allow lists — can't restrict access by network |
+| Automatic PR reviews still work | Only 2,000-3,000 Actions minutes (enough for self-hosted) |
+| Can upgrade to Enterprise later without losing data | Only 2 GB Packages storage |
+| No commitment to GitHub Enterprise | No annual invoicing for Copilot |
+| Good for small teams evaluating Copilot | Hard to justify for a company where source code is the core asset |
+
+**Best for:** Teams that want to try Copilot without committing to GitHub Enterprise. Acceptable short-term, but lacks the access controls a CAE company needs to protect its IP.
+
+---
+
+### Option 2: GH Enterprise + Copilot Business ($40/user/month) ← RECOMMENDED
+
+*GitHub Enterprise ($21/user) + Copilot Business ($19/user)*
+
+| ✅ Pros | ❌ Cons |
+|---|---|
+| Full enterprise security — SSO, audit log, IP allow lists | $105/month more than Option 1 (for 5 users) |
+| Secret scanning and code scanning (CodeQL) included | Copilot Business cannot be invoiced annually (card or Azure only) |
+| 50,000 Actions minutes included | Smaller included credit pool (1,900/user vs 3,900) |
+| 50 GB Packages storage | — |
+| Same AI models and functionality as Copilot Enterprise | — |
+| Same Copilot security as Enterprise | — |
+| Automatic PR code reviews | — |
+| Saves $1,200/year vs. Option 3 with no loss of capability | — |
+| Can upgrade to Copilot Enterprise later if needed | — |
+| GitHub Enterprise justifies itself for SSO and audit alone | — |
+| Annual invoicing available for the GitHub Enterprise portion | — |
+
+**Best for:** The recommended starting point. Full enterprise security for the codebase, full AI capability for developers, and the lowest possible Copilot cost. The $21/user Enterprise premium pays for SSO and audit trail — critical for a company whose source code is its core asset.
+
+---
+
+### Option 3: GH Enterprise + Copilot Enterprise ($60/user/month)
+
+*GitHub Enterprise ($21/user) + Copilot Enterprise ($39/user)*
+
+| ✅ Pros | ❌ Cons |
+|---|---|
+| Largest included credit pool — 3,900/user ($39 worth) | $20/user/month more than Option 2 with no additional features |
+| Everything in Option 2 included | Same AI models and security as Copilot Business |
+| Annual invoicing available for everything | At modelled usage, costs exactly the same as Option 2 |
+| Slightly simpler billing — one Enterprise agreement | $1,200/year wasted if any developer uses < $39/month of AI |
+| — | Requires GitHub Enterprise (cannot be purchased standalone) |
+| — | Over-provisions credits that don't roll over |
+| — | No technical advantage over Option 2 |
+
+**Best for:** Only if finance requires a single annual invoice for everything (GitHub + Copilot), or if the team is confident every developer will consistently use $39+/month of AI credits (unlikely for a 5-person team with mixed usage).
+
+---
+
+### Side-by-Side Cost at Modelled Usage (5 Users)
+
+|  | Option 1 | **Option 2 (Recommended)** | Option 3 |
+|---|---|---|---|
+| Platform licence | $20/month | **$105/month** | $105/month |
+| Copilot licence | $95/month | **$95/month** | $195/month |
+| AI overage (expected) | $282/month | **$282/month** | $182/month |
+| **Expected total** | **$397/month** | **$482/month** | **$482/month** |
+| **Expected annual** | **$4,764/year** | **$5,784/year** | **$5,784/year** |
+| SSO + Audit + Security | ❌ No | **✅ Yes** | ✅ Yes |
+
+> **Key takeaway:** Options 2 and 3 cost the same at expected usage. The $20/user difference in licence fees is offset by lower overage charges in Option 3 — but the moment usage drops (quiet month, developer on leave, cheaper model), Option 3 becomes the more expensive one. **Option 2 is never more expensive than Option 3, and is always cheaper when usage is below $39/user.**
+
+---
+
 > *Sources: GitHub Support correspondence with Donovan Borje; [GitHub Pricing](https://github.com/pricing); [Copilot Plans](https://docs.github.com/en/copilot/get-started/plans); [Copilot Models & Pricing](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing); [Actions Runner Pricing](https://docs.github.com/en/billing/reference/actions-runner-pricing). All prices in USD.*
 >
-> *Related documents: [Copilot Business Token Credit Allocation](Copilot-Business-Token-Credit-Allocation.md) · [Copilot C++ Review, Models & Cost Guide](Copilot-CPP-Review-Models-Cost-Guide.md) · [CVS to GitHub Migration Report](CVS-to-GitHub-Migration-Detailed-Report.md)*
+> *Related documents: [Copilot Business Token Credit Allocation](Copilot-Business-Token-Credit-Allocation.md) · [Copilot C++ Review, Models & Cost Guide](Copilot-CPP-Review-Models-Cost-Guide.md) · [CVS to GitHub Migration Report](CVS-to-GitHub-Migration-Detailed-Report.md) · [Copilot Security Assessment](Copilot-Security-Assessment.md)*
+
