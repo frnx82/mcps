@@ -357,6 +357,29 @@ If the team defaults to Gemini 3.1 Pro instead of Claude Sonnet:
 
 > If Copilot saves each developer **3 hours a week** at a $50/hour loaded rate, that is **$3,000/month** of recovered capacity against an expected **$482/month** of cost — a **6× return on investment**.
 
+### Scaled to 50 Developers
+
+Same model, same team mix ratio (40% heavy, 40% moderate, 20% light):
+
+| | 5 Developers | 50 Developers |
+|---|---|---|
+| GitHub Enterprise (@ $21/user) | $105/month | $1,050/month |
+| Copilot Business (@ $19/user) | $95/month | $950/month |
+| Included credit pool | 9,500 ($95) | 95,000 ($950) |
+| Team model spend (Sonnet-class) | $377/month | $3,770/month |
+| AI overage (spend minus pool) | $282/month | $2,820/month |
+| Self-hosted build runner | $0 | $300/month |
+| **Expected monthly total** | **$482** | **$5,120** |
+| **Expected annual total** | **$5,784** | **$61,440** |
+| **Per developer per month** | **$96** | **$102** |
+
+| | 5 Developers | 50 Developers |
+|---|---|---|
+| With cost-first model policy (Gemini) | $316/month | $2,816/month |
+| Worst case (all $250 budgets hit) | $1,450/month | $14,500/month |
+
+> **At 50 developers:** The per-developer cost rises only slightly from $96 to $102/month because licences and pool scale linearly. The self-hosted build runner ($300/month) is amortized across all 50 users. At $50/hour loaded rate, Copilot saving 3 hours/week/developer recovers **$30,000/month** of capacity against **$5,120/month** of cost — still a **6× return**.
+
 ---
 
 ## 11. Frequently Asked Questions
