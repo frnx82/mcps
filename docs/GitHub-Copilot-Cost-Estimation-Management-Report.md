@@ -527,7 +527,118 @@ A: We don't — and that is stated plainly. This is a bottom-up model, not measu
 
 ---
 
+## 13. Self-Hosted Qwen 3 8B — Can It Reduce AI Token Costs?
+
+### The Idea
+
+Run a local AI model (Qwen 3 8B via Ollama) on-premise to handle routine coding tasks — freeing up Copilot credits for complex C++ reasoning where premium models (Claude Sonnet, GPT-5.4) excel.
+
+### Important Limitation
+
+> ⚠️ **You cannot replace GitHub Copilot with a self-hosted model.** Copilot uses GitHub's infrastructure and its own model routing. You cannot point Copilot at your own Qwen server. A self-hosted model would run as a **separate tool** alongside Copilot — via **Continue.dev** (open-source VS Code/VS extension), **Visual Studio 2026's built-in "Bring Your Own Model"** feature, or a custom internal API.
+
+### What Qwen 3 8B Can and Cannot Do
+
+| Task | Qwen 3 8B (Self-Hosted) | Copilot (Cloud Models) |
+|---|---|---|
+| Code completions / autocomplete | ✅ Good (via Continue.dev) | ✅ **Free and unlimited already** |
+| Simple code explanations | ✅ Good | ✅ Better |
+| Boilerplate / template generation | ✅ Good | ✅ Better |
+| Documentation / comments | ✅ Good | ✅ Better |
+| Complex C++ solver logic | ⚠️ Weak — 8B model lacks depth | ✅ **Much better** (Sonnet/GPT-5.4) |
+| Multi-file refactoring | ❌ Poor | ✅ **Agent Mode excels here** |
+| CAE numerical algorithm reasoning | ❌ Poor | ✅ **Requires frontier models** |
+| PR code review | ❌ Not available | ✅ GitHub integration |
+| Codebase-wide search (@workspace) | ❌ Limited | ✅ Full GitHub integration |
+
+### Hardware Requirements — Qwen 3 8B
+
+| Component | Minimum | Recommended | Cost |
+|---|---|---|---|
+| **GPU** | RTX 3060 12GB | RTX 4060 Ti 16GB | $300-500 (used/new) |
+| **RAM** | 16 GB | 32 GB | $60-120 |
+| **Storage** | 20 GB free | SSD, 50 GB free | Existing |
+| **Inference speed** | ~20 tokens/sec (CPU) | ~40+ tokens/sec (GPU) | — |
+
+**Option A: Dedicated server for 5 developers**
+
+| Item | Cost |
+|---|---|
+| Server with RTX 4060 Ti 16GB, 32GB RAM | $1,500-2,500 |
+| Amortized over 3 years | ~$42-70/month |
+| Electricity (~150W average) | ~$12/month |
+| Administration | ~$50/month (1 hr/month) |
+| **Total monthly cost** | **~$104-132/month** |
+| Ollama + Continue.dev | **$0** (open source) |
+
+**Option B: Run on existing developer workstations**
+
+| Item | Cost |
+|---|---|
+| GPU upgrade per workstation (if needed) | $300-500 per machine |
+| 5 workstations × $400 | $2,000 one-time |
+| Amortized over 3 years | ~$56/month total |
+| No additional server/electricity | $0 |
+| **Total monthly cost** | **~$56/month** |
+
+### How Much Could It Save?
+
+The idea is to offload **simple/routine tasks** to the local model and reserve **Copilot credits for complex work only**.
+
+| Developer Activity | Monthly Credits (Copilot) | Can Qwen 3 8B Handle? | Credits Saved |
+|---|---|---|---|
+| Simple chat questions | ~2,200 | ✅ Yes — move to local | **~2,200** |
+| Documentation generation | ~3,300 | ✅ Yes — move to local | **~3,300** |
+| Boilerplate code generation | ~2,000 | ✅ Yes — move to local | **~2,000** |
+| Complex C++ reasoning | ~14,000 | ❌ No — keep on Copilot | 0 |
+| Agent Mode (refactoring/fixes) | ~20,000 | ❌ No — keep on Copilot | 0 |
+| PR code reviews | ~2,200 | ❌ No — keep on Copilot | 0 |
+| **Total per developer** | **~43,700** | | **~7,500 saved** |
+
+### Cost Comparison: With and Without Self-Hosted Qwen
+
+| | Without Qwen (Copilot Only) | With Qwen Hybrid | Difference |
+|---|---|---|---|
+| Copilot credits used (5 devs, team) | ~175,000 | ~137,500 | -37,500 credits |
+| Team AI overage (Sonnet-class) | $282/month | $182/month | **-$100/month** |
+| Qwen hosting cost | $0 | ~$104/month | +$104/month |
+| **Net monthly impact** | **$282** | **$286** | **+$4/month** |
+| **Net annual impact** | **$3,384** | **$3,432** | **+$48/year** |
+
+### The Honest Assessment
+
+| Factor | Verdict |
+|---|---|
+| **Does it save money?** | ❌ **No** — at 5 users, savings (~$100/mo) are almost exactly offset by hosting costs (~$104/mo). Net impact is break-even or slightly more expensive. |
+| **Does it improve quality?** | ❌ **No** — Qwen 3 8B is significantly weaker than Claude Sonnet / GPT-5.4 for C++ CAE work. Developers will notice the quality drop. |
+| **Does it improve privacy?** | ✅ **Yes** — simple queries never leave the network. But Copilot already has strong privacy policies (no training on your code). |
+| **Does it add complexity?** | ⚠️ **Yes** — two separate AI tools, two workflows, additional hardware to maintain. |
+| **When does it make sense?** | At **25+ developers** where the credit savings scale but hardware costs don't, or in **air-gapped environments** where cloud access is restricted. |
+
+### Break-Even Point
+
+| Team Size | Monthly Credit Savings | Hosting Cost | Net Saving |
+|---|---|---|---|
+| 5 developers | $100 | $104 | **-$4 (loss)** |
+| 10 developers | $200 | $104 | **+$96/month** |
+| 25 developers | $500 | $150 (larger GPU) | **+$350/month** |
+| 50 developers | $1,000 | $200 (dual GPU) | **+$800/month** |
+
+### Recommendation
+
+| Team Size | Self-Hosted Qwen 3 8B? | Reason |
+|---|---|---|
+| **5 users (pilot)** | ❌ **Not worth it** | Break-even at best, adds complexity, quality drop |
+| **10-25 users** | ⚠️ **Evaluate** | Starts saving $100-350/month, but adds maintenance burden |
+| **50+ users** | ✅ **Consider seriously** | Saves $800+/month, host a larger model (Qwen 35B) for better quality |
+| **Air-gapped / compliance** | ✅ **Required** | Only option when code cannot reach the cloud |
+
+> **For your 5-developer pilot: stick with Copilot only.** The self-hosted model doesn't save money at this scale, and the quality gap on C++ CAE work is significant. Revisit when the team grows to 10+ developers, or if you identify a use case where code must not leave the network.
+
+---
+
 > *Sources: GitHub Support correspondence with Donovan Borje; [GitHub Pricing](https://github.com/pricing); [Copilot Plans](https://docs.github.com/en/copilot/get-started/plans); [Copilot Models & Pricing](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing); [Actions Runner Pricing](https://docs.github.com/en/billing/reference/actions-runner-pricing). All prices in USD.*
 >
 > *Related documents: [Copilot Business Token Credit Allocation](Copilot-Business-Token-Credit-Allocation.md) · [Copilot C++ Review, Models & Cost Guide](Copilot-CPP-Review-Models-Cost-Guide.md) · [CVS to GitHub Migration Report](CVS-to-GitHub-Migration-Detailed-Report.md) · [Copilot Security Assessment](Copilot-Security-Assessment.md)*
+
 
