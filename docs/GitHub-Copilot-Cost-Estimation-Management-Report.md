@@ -226,47 +226,100 @@ A developer can do:
 
 ## 7. Build Infrastructure — Cloud vs. On-Premise Runners
 
-### GitHub-Hosted Runners (Cloud)
+### ⚠️ Critical: Standard 2-Core Runners Are Too Slow for C++ CAE Builds
 
-| Item | Details | Cost |
-|---|---|---|
-| **Included with Enterprise** | 50,000 minutes/month | $0 |
-| **Runner type** | Ubuntu Linux, 2-core, 7 GB RAM | Standard |
-| **Overage rate** | $0.006/minute (Linux 2-core) | Per-minute |
-| **Larger runners** | 4-core: $0.016/min, 8-core: $0.032/min | Per-minute |
+GitHub Enterprise includes 50,000 minutes/month of GitHub-hosted runner time. However, the standard 2-core runners are inadequate for compiling large C++ CAE codebases. Real C++ builds require 8-core or larger runners, which consume the included pool at accelerated rates.
 
-### C++ Build Time Estimation
+### GitHub-Hosted Runner Pricing
 
-| Build Type | Estimated Time | Monthly Frequency | Minutes/Month |
-|---|---|---|---|
-| Full C++ build (1.2 GB codebase) | 30-60 min | 20 builds | 600-1,200 min |
-| Incremental build | 5-15 min | 100 builds | 500-1,500 min |
-| Unit tests | 10-20 min | 100 runs | 1,000-2,000 min |
-| **Total estimate** | | | **2,100-4,700 min/month** |
+| Runner Size | Rate/Minute | Pool Multiplier | Effective Included Minutes | Realistic for C++ CAE? |
+|---|---|---|---|---|
+| **2-core** (standard) | $0.008/min | 1× | 50,000 min | ❌ Too slow (60-120 min full build) |
+| **4-core** | $0.016/min | 2× | 25,000 min | ⚠️ Marginal (30-60 min full build) |
+| **8-core** | $0.032/min | 4× | 12,500 min | ✅ Usable (15-30 min full build) |
+| **16-core** | $0.064/min | 8× | 6,250 min | ✅ Good (8-15 min full build) |
+| **32-core** | $0.128/min | 16× | 3,125 min | ✅ Fast (5-10 min full build) |
 
-> **Verdict:** 50,000 included minutes is **more than sufficient** for a 5-developer team. You will not incur overage charges for builds.
+> **How the pool works:** The 50,000 included minutes represent a **$400/month credit value**. Using 8-core runners costs 4× more per minute, so you effectively get 12,500 minutes instead of 50,000.
 
-### On-Premise (Self-Hosted) Runners — Cost Comparison
+### Realistic C++ CAE Build Costs (5 Users)
+
+#### Scenario A: Using 8-Core Cloud Runners (Minimum Recommended)
+
+| Build Type | Time (8-core) | Frequency/Month | Minutes | Cost ($0.032/min) |
+|---|---|---|---|---|
+| Full C++ build | 20 min | 40 builds | 800 | $25.60 |
+| Incremental build | 5 min | 200 builds | 1,000 | $32.00 |
+| Unit tests | 10 min | 150 runs | 1,500 | $48.00 |
+| Integration tests | 15 min | 30 runs | 450 | $14.40 |
+| **Total** | | | **3,750 min** | **$120/month** |
+
+```
+Included credit: $400/month
+8-core usage:    $120/month
+Overage:         $0 ← Still within included credit ✅
+```
+
+#### Scenario B: Using 16-Core Cloud Runners (Better Performance)
+
+| Build Type | Time (16-core) | Frequency/Month | Minutes | Cost ($0.064/min) |
+|---|---|---|---|---|
+| Full C++ build | 12 min | 40 builds | 480 | $30.72 |
+| Incremental build | 3 min | 200 builds | 600 | $38.40 |
+| Unit tests | 6 min | 150 runs | 900 | $57.60 |
+| Integration tests | 10 min | 30 runs | 300 | $19.20 |
+| **Total** | | | **2,280 min** | **$146/month** |
+
+```
+Included credit: $400/month
+16-core usage:   $146/month
+Overage:         $0 ← Still within included credit ✅
+```
+
+#### Scenario C: Heavy Build Volume (Growing Team)
+
+| Team Size | Runner | Builds/Month | Minutes | Gross Cost | Included Credit | **Net Overage** |
+|---|---|---|---|---|---|---|
+| 5 users | 8-core | Moderate | 3,750 | $120 | $400 | **$0** |
+| 5 users | 16-core | Moderate | 2,280 | $146 | $400 | **$0** |
+| 5 users | 16-core | Heavy | 6,000 | $384 | $400 | **$0** |
+| 10 users | 16-core | Heavy | 12,000 | $768 | $800 | **$0** |
+| 50 users | 16-core | Heavy | 40,000 | $2,560 | $4,000 | **$0** |
+| **Extreme** | 32-core | Very heavy | 10,000 | $1,280 | $400 | **$880/month** |
+
+> **For 5 users:** Even with 16-core runners and heavy builds, the included $400/month credit covers the cost. Overage only becomes a concern at extreme build volumes (32-core runners or 50+ developers).
+
+### Self-Hosted (On-Premise) Runners — The Cost-Effective Alternative for C++ CAE
 
 | Factor | GitHub-Hosted (Cloud) | Self-Hosted (On-Premise) |
 |---|---|---|
-| **Cost for 5,000 min/month** | **$0** (within 50K included) | Hardware + maintenance |
-| **Setup effort** | Zero | Server setup, runner agent install |
-| **Maintenance** | Zero | OS patches, monitoring, troubleshooting |
-| **Build speed** | Standard (2-core shared VM) | **Faster** (dedicated hardware, NVMe SSD) |
-| **Specialized toolchains** | Limited (standard Ubuntu) | **Full control** (custom C++ compilers, CAE tools) |
-| **Cost at scale (50+ devs)** | May exceed 50K minutes → overage | Fixed cost regardless of usage |
+| **Monthly cost (5 users, 16-core)** | $0-146 (within included credit) | ~$200/month amortized |
+| **Monthly cost (50 users, 16-core)** | $0-2,560 | ~$400/month amortized |
+| **Setup effort** | Zero | Server setup + runner agent install |
+| **Maintenance** | Zero | OS patches, monitoring (~2 hrs/month) |
+| **Build speed** | Variable (shared VMs, cold starts) | **Consistent** (dedicated hardware, warm caches) |
+| **Build cache (ccache)** | ❌ Lost each run | ✅ **Persistent — 50-80% faster incremental** |
+| **Custom toolchains** | Limited (standard Ubuntu) | ✅ **Full control** (Intel oneAPI, NVCC, etc.) |
+| **Commercial solvers** | ❌ Cannot install licenses | ✅ **ANSYS, Abaqus, etc.** |
+| **Data stays on-prem** | ❌ Code sent to cloud | ✅ **Air-gapped / compliant** |
 
-### Self-Hosted Runner Recommendation for C++ CAE
+### Self-Hosted Runner Cost Breakdown
 
-| Scenario | Recommendation | Reason |
+| Item | One-Time Cost | Monthly Amortized (3yr) |
 |---|---|---|
-| **5-user pilot** | ✅ **Use GitHub-hosted** | Free (within 50K minutes), zero maintenance |
-| **50-user rollout** | ⚠️ **Hybrid approach** | Simple builds in cloud, heavy C++ builds on-premise |
-| **Specialized CAE toolchains** | ✅ **Self-hosted required** | Commercial solvers, custom compilers not available in cloud |
-| **Air-gapped / compliance** | ✅ **Self-hosted required** | Code cannot leave corporate network |
+| Build server (32-core, 128GB RAM, NVMe SSD) | $5,000-8,000 | ~$140-220 |
+| Annual maintenance (patches, monitoring) | $500/year | ~$42 |
+| Electricity (~400W server) | — | ~$30-50 |
+| **Total** | **$5,500-8,500** | **~$210-310/month** |
 
-> **Recommendation for pilot (5 users):** Use GitHub-hosted runners. Your ~5,000 min/month is well within the 50,000 included minutes. Switch to self-hosted later if build times become a bottleneck or you need specialized toolchains.
+### Build Infrastructure Recommendation
+
+| Phase | Recommendation | Monthly Build Cost | Reason |
+|---|---|---|---|
+| **Pilot (5 users)** | ✅ GitHub-hosted (8/16-core) | **$0** (within included) | Zero setup, adequate performance |
+| **Growth (10-25 users)** | ⚠️ Evaluate self-hosted | $0-500 cloud vs. $250 self-hosted | Break-even at ~$400/month cloud spend |
+| **Scale (50+ users)** | ✅ **Self-hosted recommended** | ~$300/month self-hosted | Saves $2,000+/month vs. cloud, faster builds |
+| **Specialized CAE tools** | ✅ **Self-hosted required** | ~$300/month | Commercial solvers can't run in cloud |
 
 ---
 
@@ -280,8 +333,8 @@ A developer can do:
 | **Copilot Business** (5 users) | $95 | $1,140 | AI coding assistant, 1,900 credits/user |
 | **Token overage budget** (5 × $250) | $1,250 max | $15,000 max | Per-user budget caps, actual likely lower |
 | **Git LFS storage** (1.2 GB) | $0 | $0 | Within 250 GB Enterprise allowance |
-| **GitHub Actions** (~5K min/mo) | $0 | $0 | Within 50K included minutes |
-| **Self-hosted runners** | $0 | $0 | Not needed for pilot |
+| **GitHub Actions** (8/16-core runners) | $0 | $0 | Within included $400/month credit |
+| **Self-hosted runners** | $0 | $0 | Not needed for pilot phase |
 | **Total (maximum)** | **$1,450** | **$17,400** | |
 | **Total (realistic estimate)** | **~$950-1,200** | **~$11,400-14,400** | Token usage likely below max budget |
 
@@ -292,6 +345,7 @@ A developer can do:
 | GitHub Enterprise | $0.70 |
 | Copilot Business | $0.63 |
 | Token budget (max $250/mo) | $11.36 |
+| Build infrastructure | $0 |
 | **Total per developer per day** | **~$12.70** |
 
 > **Context:** If Copilot saves each developer just **30 minutes per day** (conservative estimate for C++ development), and the fully-loaded cost of a developer is $80-120/hour, the daily savings are **$40-60** vs. a cost of **$12.70** — a **3-5× return on investment**.
@@ -300,17 +354,14 @@ A developer can do:
 
 ## 9. Scaling Projections
 
-| Team Size | GH Enterprise | Copilot Business | Token Budget ($250/user) | **Total Annual** |
-|---|---|---|---|---|
-| **5 users** | $1,260 | $1,140 | $15,000 | **$17,400** |
-| **10 users** | $2,520 | $2,280 | $30,000 | **$34,800** |
-| **25 users** | $6,300 | $5,700 | $75,000 | **$87,000** |
-| **50 users** | $12,600 | $11,400 | $150,000 | **$174,000** |
+| Team Size | GH Enterprise | Copilot Business | Token Budget ($250/user) | Build Cost | **Total Annual** |
+|---|---|---|---|---|---|
+| **5 users** | $1,260 | $1,140 | $15,000 | $0 | **$17,400** |
+| **10 users** | $2,520 | $2,280 | $30,000 | $0 | **$34,800** |
+| **25 users** | $6,300 | $5,700 | $75,000 | ~$3,600 | **$90,600** |
+| **50 users** | $12,600 | $11,400 | $150,000 | ~$3,600 | **$177,600** |
 
-> **Note:** At scale, token costs can be optimized by:
-> - Reducing per-user budget from $250 to $150-200 based on actual usage data
-> - Enabling auto-model selection (GitHub's recommended approach — potential 10% savings)
-> - Setting team-level budgets that leverage credit pooling
+> **Note on builds at scale:** For 25+ users, self-hosted runners (~$300/month = $3,600/year) become more cost-effective than cloud runners and provide faster builds with persistent caches.
 
 ---
 
@@ -323,6 +374,7 @@ A developer can do:
 | GitHub Enterprise | $315 (3 months) | Upgrade from trial to paid |
 | Copilot Business | $285 (3 months) | Enable for 5 developers |
 | Token overage cap | $100/user/month | Conservative budget while measuring usage |
+| Builds | $0 | GitHub-hosted 8-core (within included credit) |
 | **Phase 1 Total** | **~$2,100** | Validate productivity gains |
 
 ### Phase 2: Expansion (Months 4-12) — 10-25 Users
@@ -339,7 +391,7 @@ A developer can do:
 | Item | Action |
 |---|---|
 | Negotiate volume pricing | Contact GitHub Sales for 50+ seat discounts |
-| Implement self-hosted runners | For specialized C++ builds |
+| Implement self-hosted runners | For specialized C++ / CAE builds |
 | Optimize token usage | Model selection, team budgets, usage policies |
 
 ---
@@ -377,7 +429,7 @@ A: $0.01 USD. So 25,000 credits = $250.
 A: The trial allocation was 1,900 credits per user (standard rate). Agent Mode, which is extremely useful for C++ development, consumes 50-1,000 credits per session — meaning 2-3 agent sessions per day can exhaust the monthly allocation in under a week. This is normal for active development teams.
 
 **Q: Can we set a hard spending cap to prevent surprise bills?**
-A: Yes. Go to Org Settings → Billing → Budgets → set a monthly cap with "Stop usage when budget limit is reached" enabled. You can also set per-user limits.
+A: Yes. Go to Org Settings → Billing → Budgets → set a monthly cap with "Stop usage when budget limit is reached" enabled. You can also set per-user limits (Universal User-Level Budget).
 
 ---
 
@@ -396,14 +448,20 @@ A: $0 for the repository itself. GitHub does not charge per-GB for standard Git 
 
 ### Builds & CI/CD
 
-**Q: How many build minutes are included with GitHub Enterprise?**
-A: 50,000 minutes/month on GitHub-hosted runners (Linux). For a 5-developer team building a C++ project, expected usage is ~5,000 min/month — well within the included allowance.
+**Q: Are standard 2-core GitHub runners adequate for C++ CAE builds?**
+A: No. Standard 2-core runners will take 60-120+ minutes for a full build of a 1.2 GB C++ codebase, which is impractically slow. We recommend 8-core runners (minimum) or 16-core runners for acceptable build times of 8-20 minutes.
 
-**Q: Is it cheaper to build C++ code on self-hosted runners?**
-A: For a 5-user team, NO — use GitHub-hosted runners (free within 50K minutes). At scale (50+ users or specialized toolchains), self-hosted runners become cost-effective because you avoid per-minute charges and can use dedicated high-performance hardware.
+**Q: How much do cloud runners actually cost for C++ builds?**
+A: For a 5-user team using 8-core runners at moderate build volume (~3,750 min/month), the cost is ~$120/month — fully covered by the included $400/month Actions credit in GitHub Enterprise. No overage expected during the pilot phase.
+
+**Q: When do build costs become significant?**
+A: At extreme build volumes (32-core runners running 10,000+ min/month), overage charges of $400-880/month can occur. At that scale, self-hosted runners ($250-300/month amortized) save 50-75%.
 
 **Q: Can we use our existing on-premise build servers as GitHub Actions runners?**
-A: Yes. Install the GitHub Actions runner agent on any Linux/Windows/macOS server. Self-hosted runner usage on private repos is currently free from GitHub platform charges.
+A: Yes. Install the GitHub Actions runner agent on any Linux/Windows/macOS server. Self-hosted runner usage on private repos is currently free from GitHub platform charges. This is strongly recommended for 25+ developer teams or when commercial CAE solver licenses are required.
+
+**Q: Is it more efficient to build C++ on-premise?**
+A: Yes, for three reasons: (1) persistent build caches (ccache) make incremental builds 50-80% faster, (2) dedicated hardware avoids cloud cold-start delays, (3) commercial C++ compilers and CAE solvers require on-premise licenses. At scale, self-hosted runners save $2,000+/month vs. cloud runners.
 
 ---
 
